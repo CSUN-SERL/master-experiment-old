@@ -25,7 +25,6 @@ find_package(catkin REQUIRED COMPONENTS
    Rect.msg
    DetectionIdImage.msg
    DetectionMatch.msg
-   CompiledMessage.msg
    CompiledFakeMessage.msg
    AudioDetection.msg
    AudioFileReady.msg

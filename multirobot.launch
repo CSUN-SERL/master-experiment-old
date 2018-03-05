@@ -2,19 +2,36 @@
 
 <launch>
 
+	<arg name="mission_string" />
+
   <machine name="station1" address="station1" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
   <machine name="station4" address="station4" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
   <machine name="station3" address="station3" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
   <machine name="azeroth" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
 
-	<include file="$(find darknet_ros)/launch/darknet-bot-1-station-1.launch" />
-	<include file="$(find darknet_ros)/launch/darknet-bot-2-station-3.launch" />
-	<include file="$(find darknet_ros)/launch/darknet-bot-3-station-3.launch" />
-	<include file="$(find darknet_ros)/launch/darknet-bot-4-station-4.launch" />
+	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+		<arg name="name" value="robot_detection_1" />
+		<arg name="mission_number" value="$(arg mission_string)" />
+		<arg name="robot_number" value="1" />
+	</include>
 
-	<include file="$(find tracker)/launch/tracker-multirobot.launch" />
+	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+		<arg name="name" value="robot_detection_2" />
+		<arg name="mission_number" value="$(arg mission_string)" />
+		<arg name="robot_number" value="2" />
+	</include>
 
-	<node pkg="image_draw" type="image_draw_node" name="image_draw_node" />
+	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+		<arg name="name" value="robot_detection_3" />
+		<arg name="mission_number" value="$(arg mission_string)" />
+		<arg name="robot_number" value="3" />
+	</include>
+
+	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+		<arg name="name" value="robot_detection_4" />
+		<arg name="mission_number" value="$(arg mission_string)" />
+		<arg name="robot_number" value="4" />
+	</include>
 
 	<node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" />
 	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" />
