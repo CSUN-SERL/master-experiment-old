@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <!-- Start darknet and ros wrapper -->
+  <node pkg="detection_calculation" type="detection_calculation_node" name="$(arg name)" output="screen">
+    <param name="mission_number" value="$(arg mission_number)" />
+    <param name="robot_number" value="$(arg robot_number)" />
+  </node>
+
+
+</launch>

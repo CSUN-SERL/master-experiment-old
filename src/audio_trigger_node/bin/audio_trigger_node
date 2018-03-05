@@ -1,0 +1,6 @@
+#! /usr/bin/env python
+
+import audio_trigger_node.audio_trigger
+
+if __name__ == '__main__':
+    audio_trigger_node.audio_trigger.main()
