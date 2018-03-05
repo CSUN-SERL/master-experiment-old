@@ -22,13 +22,10 @@ def process():
 
 
 def getInfo(data):
-	#print("***************GOT INFO")
-	print(str(len(data.humans)))
 	for i in range(len(data.humans)):
 		if data.humans[i].id not in human_tracked.keys():
 			print("NEW DETECTION WEEEEE")
 			human_tracked[data.humans[i].id] = 1
-			#data.humans[i].dclass = 1
 			data.humanQueries.append(data.humans[i].id)
 	pub.publish(data)
 
