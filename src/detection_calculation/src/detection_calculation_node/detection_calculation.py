@@ -58,7 +58,6 @@ def process():
 
 
 def Odometry_update(data):
-	#print("***********************Got odometry")
 	#Getting x and z change for robot
 	x = data.pose.pose.position.x
 	y = data.pose.pose.position.y
@@ -91,24 +90,24 @@ def Odometry_update(data):
 	compiled_msgs_.humans = []
 
 
-#Conversion Function 
-# def quaternion_to_euler_angle(x, y, z, w):
-# 	ysqr = y * y
+Conversion Function 
+def quaternion_to_euler_angle(x, y, z, w):
+	ysqr = y * y
 
-# 	t0 = +2.0 * (w * x + y * z)
-# 	t1 = +1.0 - 2.0 * (x * x + ysqr)
-# 	X = math.atan2(t0, t1)
+	t0 = +2.0 * (w * x + y * z)
+	t1 = +1.0 - 2.0 * (x * x + ysqr)
+	X = math.atan2(t0, t1)
 
-# 	t2 = +2.0 * (w * y - z * x)
-# 	t2 = +1.0 if t2 > +1.0 else t2
-# 	t2 = -1.0 if t2 < -1.0 else t2
-# 	Y = math.asin(t2)
+	t2 = +2.0 * (w * y - z * x)
+	t2 = +1.0 if t2 > +1.0 else t2
+	t2 = -1.0 if t2 < -1.0 else t2
+	Y = math.asin(t2)
 
-# 	t3 = 2.0 * (w * z + x * y)
-# 	t4 = 1.0 - (2.0 * (ysqr + z * z))
-# 	Z = math.atan2(t3, t4)
+	t3 = 2.0 * (w * z + x * y)
+	t4 = 1.0 - (2.0 * (ysqr + z * z))
+	Z = math.atan2(t3, t4)
 	
-# 	return X, Y, Z  
+	return X, Y, Z  
 
 
 def shift_points(RX,RY,HX,HY):
@@ -127,27 +126,24 @@ def cartesian_to_polar_angle(x,y):
 	return math.atan(y/x)
 
 
-
 def find(RoboPosX, RoboPosY, RoboPosTh):
-	#for i in range(0,291):
 	for i in range(291):
 		human_num = str(i)
 		dist = math.sqrt( (RoboPosX - MyHumans[human_num]['x'])**2 + (RoboPosY - MyHumans[human_num]['y'])**2)
 		if dist <= max_distance:  #dof
 			rx,ry,hx,hy = shift_points(robot_pos_x,robot_pos_y, MyHumans[human_num]['x'], MyHumans[human_num]['y'])
-			# human_degree = math.degree(cartesian_to_polar_angle(hx, hy))
-			# robot_degree = math.degree(RoboPosTh)
-			# FOV_degree = math.degree(init_robot_pose[str(mission_number_)][str(robot_number_)]['fov'])/2.0		#field of view divided by two, relative to robot
 			human_angle = cartesian_to_polar_angle(hx, hy)
 			fov_offset = init_robot_pose[str(mission_number_)][str(robot_number_)]['fov']/2.0
 			robot_angle_upper = RoboPosTh + fov_offset
 			robot_angle_lower = RoboPosTh - fov_offset
+
 			if human_angle < 0:
 				human_angle += math.pi*2
 			if robot_angle_lower < 0:
 				robot_angle_lower += math.pi*2
 			if robot_angle_upper < 0:
 				robot_angle_upper += math.pi*2
+				
 			# if robot_number_ == 3:
 			# 	print('robot ' + str(robot_angle_lower) + ', ' + str(robot_angle_upper) + ' PERSON ' + str(human_angle))
 			if (human_angle <= robot_angle_upper ) and (human_angle >= robot_angle_lower and (MyHumans[str(i)]['dclass'] != 2)):
