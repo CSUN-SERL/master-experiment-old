@@ -6,6 +6,7 @@ namespace sarwai {
 
   ImageBoundingBoxMerger::ImageBoundingBoxMerger(std::string subscriptionTopic) {
     m_nh = new ros::NodeHandle();
+    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@MP IMAGE DRAW" << std::endl;
 
     m_trackingSub = m_nh->subscribe(subscriptionTopic, 1000, &ImageBoundingBoxMerger::drawBoxesCallback, this);
     m_visualDetectionPub = m_nh->advertise<detection_msgs::ProcessedVisualDetection>("/sarwai_detection/detection_processeddetection", 1000);
@@ -22,10 +23,12 @@ namespace sarwai {
   }
   
   void ImageBoundingBoxMerger::drawBoxesCallback(const detection_msgs::CompiledFakeMessageConstPtr& msg) {
+    //std::cout << "*******************************GOT IMAGE BBMERGER" << std::endl;
     // Draw boxes for each new query
     for(unsigned i = 0; i < msg->humanQueries.size(); ++i) {
       for(unsigned h = 0; h < msg->humans.size(); ++h) {
         if(msg->humans[h].id == msg->humanQueries[i]) {
+          std::cout << "SENDING QUERY" << std::endl;
           drawBoxAndSendQuery(msg, msg->humans[h]);
           break;
         }
@@ -43,6 +46,7 @@ namespace sarwai {
     detection_msgs::ProcessedVisualDetection queryMsg;
     queryMsg.image = imageCopy;
     queryMsg.robotId = msg->robot;
+    queryMsg.bounding_box = box;
 
     this->m_visualDetectionPub.publish(queryMsg);
   }
@@ -50,7 +54,7 @@ namespace sarwai {
   detection_msgs::BoundingBox ImageBoundingBoxMerger::drawBoxAroundHuman(sensor_msgs::Image& image, detection_msgs::Human human, float fov) const {
     detection_msgs::BoundingBox ret;
 	
-	unsigned yCoord = image.height - (BOXLENGTH / 2);
+	  unsigned yCoord = (image.height / 2) - (BOXLENGTH / 2);
     unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXLENGTH / 2);
     cv_bridge::CvImagePtr cvImage;
     cvImage = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);

@@ -22,6 +22,7 @@ SocketIOVisualLogger socketio_logger(".", "http://192.168.1.11", 8000);
 int main(int argc, char **argv) {
 
   // visual_logger = new VisualLogger("./");
+  std::cout << "()()()()()()()()()()()()()()()()()()()VISUAL LOGGER" << std::endl;
 
   ros::init(argc, argv, "visual_logger");
   ros::NodeHandle nh;
@@ -33,6 +34,7 @@ int main(int argc, char **argv) {
 
 void LogVisualDetection(const detection_msgs::ProcessedVisualDetection::ConstPtr& msg) {
   // Convert ROS message to logging struct
+  std::cout << "***********************LOG VISUAL DETECTION" << std::endl;
   struct VisualDetectionData data;
   data.box_height = msg->bounding_box.ymax - msg->bounding_box.ymin;
   data.box_width = msg->bounding_box.xmax - msg->bounding_box.xmin;

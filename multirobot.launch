@@ -4,10 +4,10 @@
 
 	<arg name="mission_string" />
 
-  <machine name="station1" address="station1" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
+  <!-- <machine name="station1" address="station1" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
   <machine name="station4" address="station4" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
   <machine name="station3" address="station3" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
-  <machine name="azeroth" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
+  <machine name="azeroth" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" /> -->
 
 	<include file="$(find detection_calculation)/launch/fake_detection.launch">
 		<arg name="name" value="robot_detection_1" />
@@ -33,6 +33,10 @@
 		<arg name="robot_number" value="4" />
 	</include>
 
-	<node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" />
-	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" />
+	<node pkg="pseudo_tracker" type="pseudo_tracker_node" name="pseudo_tracker_node" output="screen"/>
+	
+	<node pkg="multipurpose_image_draw" type="multipurpose_image_draw_node" name="multipurpose_image_draw_node" output="screen"/>
+
+	<node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" output="screen"/>
+	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" output="screen"/>
 </launch>
