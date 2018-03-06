@@ -14,8 +14,8 @@
 
 <!--	<include machine="azeroth" file="$(find tracker)/launch/tracker-multirobot.launch" /> -->
 
-	<node machine="station3" pkg="image_draw" type="image_draw_node" name="image_draw_node" />
+	<!-- <node machine="station3" pkg="image_draw" type="image_draw_node" name="image_draw_node" /> -->
 
-	<node machine="station3" pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" />
-	<node machine="station3" pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" />
+	<!-- <node machine="station3" pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" /> -->
+	<!-- <node machine="station3" pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" /> -->
 </launch>
