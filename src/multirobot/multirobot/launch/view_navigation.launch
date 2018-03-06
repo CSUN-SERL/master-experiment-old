@@ -1,0 +1,7 @@
+<!--
+  Used for visualising the turtlebot while building a map or navigating with the ros navistack.
+ -->
+<launch>
+  <arg name="station_name" default="" />
+  <node name="rviz2$(arg station_name)" pkg="rviz" type="rviz" args="-d $(find multirobot)/rviz/navigation_4bot.rviz"/>
+</launch>

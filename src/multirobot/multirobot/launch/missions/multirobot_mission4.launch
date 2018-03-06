@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+  <!-- No namespace here as we will share this description. 
+       Access with slash at the beginning -->
+  <!--<param name="robot_description"
+         command="$(find xacro)/xacro.py $(find turtlebot_description)/urdf/turtlebot_gazebo.urdf.xacro" /> -->
+  
+   <arg name="station_name" default="" />
+  <arg name="location_of_init_bash" />
+  
+    <!-- BEGIN ROBOT 1
+    
+    <group ns="robot1">
+        <param name="tf_prefix" value="robot1_tf" />
+    </group>
+    <include file="$(find multirobot)/launch/one_robot.launch" >
+        <arg name="init_pose_x" value="-60.098800" />
+        <arg name="init_pose_y" value="20.263300"/>
+        <arg name="init_pose_a" value="3.14"/>
+        <arg name="robot_name"  value="robot1" />
+    </include>
+-->
+   <!-- <node name="rviz1" pkg="rviz" type="rviz" args="-d $(find multirobot)/rviz/navigation_bot1.rviz"/>-->
+    
+    
+ 
+    
+    <!-- BEGIN ROBOT 2 
+    
+    <group ns="robot2">
+        <param name="tf_prefix" value="robot2_tf" />
+    </group>
+    <include file="$(find multirobot)/launch/one_robot.launch" >
+        <arg name="init_pose_x" value="-11.646700" />
+        <arg name="init_pose_y" value="69.769800"/>
+        <arg name="init_pose_a" value="3.14"/>
+        <arg name="robot_name"  value="robot2" />
+    </include>
+-->
+   <!-- <node name="rviz2" pkg="rviz" type="rviz" args="-d $(find multirobot)/rviz/navigation_bot2.rviz"/>-->
+    
+    <!-- BEGIN ROBOT 3 -->
+    
+    <group ns="robot3">
+        <param name="tf_prefix" value="robot3_tf" />
+    </group>
+    <include file="$(find multirobot)/launch/one_robot.launch" >
+      <arg name="init_pose_x" value="-16.840400" />
+      <arg name="init_pose_y" value="156.495000"/>
+      <arg name="init_pose_a" value="3.14"/>
+      <arg name="robot_name"  value="robot3" />
+    </include>
+    
+    <group ns="robot4">
+        <param name="tf_prefix" value="robot4_tf" />
+    </group>
+    <include file="$(find multirobot)/launch/one_robot.launch" >
+      <arg name="init_pose_x" value="-66.507800" />
+      <arg name="init_pose_y" value="137.373000"/>
+      <arg name="init_pose_a" value="3.14"/>
+      <arg name="robot_name"  value="robot4" />
+    </include>
+
+
+</launch>
