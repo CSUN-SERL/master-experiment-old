@@ -2,10 +2,10 @@
 
 <launch>
 
-  <machine name="station1" address="station1" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
-  <machine name="station4" address="station4" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
-  <machine name="station3" address="station3" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
-  <machine name="azeroth" address="station3" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
+  <machine name="station1" address="station1" user="serl" env-loader="/home/serl/sarwai-experiment/init-env.bash" />
+  <machine name="station4" address="station4" user="serl" env-loader="/home/serl/sarwai-experiment/init-env.bash" />
+  <machine name="station3" address="station3" user="serl" env-loader="/home/serl/sarwai-experiment/init-env.bash" />
+  <machine name="azeroth" address="station3" user="serl" env-loader="/home/serl/sarwai-experiment/init-env.bash" />
 
 	<include file="$(find darknet_ros)/launch/darknet-bot-1-station-1.launch" />
 	<include file="$(find darknet_ros)/launch/darknet-bot-2-station-3.launch" />

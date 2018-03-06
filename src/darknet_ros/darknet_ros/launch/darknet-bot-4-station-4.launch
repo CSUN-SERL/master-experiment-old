@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <launch>
-  <machine name="station4" address="station4" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
+  <!-- <machine name="station4" address="station4" user="serl" env-loader="/home/serl/sarwai-experiment/init-env.bash" /> -->
   <!-- Console launch prefix -->
   <arg name="launch_prefix" default=""/>
 
