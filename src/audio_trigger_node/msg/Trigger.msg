@@ -1,3 +1,0 @@
-string trigger_location
-string audio_file
-float32 distance_from_center

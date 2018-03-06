@@ -1,4 +1,0 @@
-sensor_msgs/Image image
-Rect regionOfInterest
-DetectionId detectionId
-bool isDetectionConcluded
