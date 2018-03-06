@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-source ~/Documents/detection/devel/setup.bash
+source ~/sarwai-experiment/devel/setup.bash
 exec "$@"
