@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+	<include file="$(find darknet_ros)/launch/darknet-bot-1-station-1.launch" />
+	<include file="$(find darknet_ros)/launch/darknet-bot-2-station-3.launch" />
+	<include file="$(find darknet_ros)/launch/darknet-bot-3-station-3.launch" />
+	<include file="$(find darknet_ros)/launch/darknet-bot-4-station-4.launch" />
+
+	<include file="$(find tracker)/launch/tracker-multirobot.launch" />
+
+	<node pkg="image_draw" type="image_draw_node" name="iamge_draw_node" />
+
+	<node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" />
+	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" />
+</launch>

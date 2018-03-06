@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <!-- Start darknet and ros wrapper -->
+  <node pkg="tracker" type="tracker_node" name="$(arg name)" output="screen">
+    <param name="topic_name_" value="$(arg topic_name_)" />
+  </node>
+
+
+</launch>

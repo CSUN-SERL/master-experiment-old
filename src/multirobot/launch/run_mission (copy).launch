@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Author name: Emre Can Bulut 
+-->
+
+
+<launch>
+
+  <arg name="mission_string" default="" />
+  <arg name="station_name" value="" />
+  <param name="/use_sim_time" value="true" />
+  <arg name="world_file"  default="$(env TURTLEBOT_GAZEBO_WORLD_FILE)"/>
+
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <!-- <arg name="station_name" value="$(arg station_name)" /> -->
+        <arg name="use_sim_time" value="true"/>
+        <arg name="debug" value="false"/>
+        <arg name="gui" value="false" />
+        <arg name="world_name" value="$(find multirobot)/worlds/jacaranda_v4_v2_humans.world"/>
+    </include>
+    
+  
+  
+  <!-- include our robots -->
+  <include file="$(find multirobot)/launch/missions/multirobot_$(arg mission_string).launch">
+        <!-- <arg name="station_name" value="$(arg station_name)" /> -->
+  </include>
+  
+  <!-- start rviz -->
+  <include file="$(find multirobot)/launch/view_navigation.launch">
+        <!-- <arg name="station_name" value="$(arg station_name)" /> -->
+  </include>
+  
+  <node name="toggle_check" pkg="waypoints" type="toggle_check.py"/>
+  
+  <node name="talker1" pkg="waypoints" type="talker1_$(arg mission_string).py"/>
+  <node name="talker2" pkg="waypoints" type="talker2_$(arg mission_string).py"/>
+  
+  <node name="talker3" pkg="waypoints" type="talker3_$(arg mission_string).py"/>
+  <node name="talker4" pkg="waypoints" type="talker4_$(arg mission_string).py"/>
+  
+  
+</launch>

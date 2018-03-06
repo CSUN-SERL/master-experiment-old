@@ -1,0 +1,4 @@
+<launch>
+  <arg name="location_of_init_bash" />
+  <machine name="station1" address="station1" user="serl" env-loader="$(arg location_of_init_bash)" />
+</launch>

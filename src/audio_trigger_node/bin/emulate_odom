@@ -1,0 +1,6 @@
+#!/usr/bin/env python2.7
+
+from audio_trigger_node import odom_emulator
+
+if __name__ == '__main__':
+    odom_emulator.main()

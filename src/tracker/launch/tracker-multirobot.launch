@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+  <!-- <machine name="station1" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" /> -->
+  <!-- <machine name="station4" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" /> -->
+  <machine name="azeroth" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
+
+  <node machine="azeroth" pkg="tracker" type="tracker_node" name="tracker_station_1" output="screen">
+    <param name="topic_name_" value="/detection_compiled_ros_msg1" />
+  </node>
+
+  <!-- runs on station 3 -->
+  <node machine="azeroth" pkg="tracker" type="tracker_node" name="tracker_station_3" output="screen">
+    <param name="topic_name_" value="/detection_compiled_ros_msg2" />
+  </node>
+
+  <node machine="azeroth" pkg="tracker" type="tracker_node" name="tracker_station_4" output="screen">
+    <param name="topic_name_" value="/detection_compiled_ros_msg3" />
+  </node>
+
+  <node machine="azeroth" pkg="tracker" type="tracker_node" name="tracker_station_5" output="screen">
+    <param name="topic_name_" value="/detection_compiled_ros_msg4" />
+  </node>
+
+ <!--<node name="republish" type="republish" pkg="image_transport" output="screen" 	args="compressed in:=/front_camera/image_raw raw out:=/camera/image_raw" /> -->
+</launch>

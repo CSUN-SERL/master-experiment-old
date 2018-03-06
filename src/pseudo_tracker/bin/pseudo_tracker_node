@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+import pseudo_tracker_node.pseudo_tracker
+
+if __name__ == '__main__':
+    pseudo_tracker_node.pseudo_tracker.main()
