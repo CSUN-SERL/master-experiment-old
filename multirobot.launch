@@ -37,6 +37,6 @@
 	
 	<node pkg="multipurpose_image_draw" type="multipurpose_image_draw_node" name="multipurpose_image_draw_node" output="screen"/>
 
-	<!-- <node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" output="screen"/>
-	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" output="screen"/> -->
+	<node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" output="screen"/>
+	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" output="screen"/>
 </launch>
