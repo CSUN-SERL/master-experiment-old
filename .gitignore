@@ -2,4 +2,4 @@ build/
 devel/
 importsrc/
 .catkin_workspace
-
+*.pyc
