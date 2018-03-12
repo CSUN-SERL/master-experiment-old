@@ -45,7 +45,7 @@ Author name: Emre Can Bulut
 
   <!--<node name="video_feed" pkg="web_video_server" type="web_video_server"/>-->
   <!--<include file="/home/serl/Documents/detection/multirobot.launch"> </include>-->
-  <include file="/home/serl/sarwai-experiment/multirobot.launch">
+  <include file="/home/serl/sarwai-experiment-fd/multirobot.launch">
     <arg name="mission_string" value="$(arg mission_string)" />
   </include>
 </launch>
