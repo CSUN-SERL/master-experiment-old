@@ -26,6 +26,7 @@ compiled_msgs_ = CompiledFakeMessage()
 #Config file dictinary
 MyHumans = yaml.load(open('/home/serl/sarwai-experiment/human.yaml'))
 init_robot_pose = yaml.load(open('/home/serl/sarwai-experiment/robot.yaml'))
+my_walls = yaml.load(open('/home/serl/sarwai-experiment/walls.yaml'))
 
 global max_distance
 
