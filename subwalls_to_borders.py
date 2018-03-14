@@ -1,9 +1,25 @@
 import json
 from decimal import Decimal as unicode_convert
 import yaml
+import math
 import numpy as np
 
 
+class floor:
+    def concat_walls(self,json_data):
+        wall_arr = []
+        # pass the floor centroid data to correct the
+        # subwall data
+        floor_data = self
+        for i in json_data:
+            wall_arr.append(wall(i,floor_data))
+        return wall_arr
+
+    def __init__(self,json_data):
+        self.centroid_x = json_data['px']
+        self.centroid_y = json_data['py']
+        self.centroid_z = json_data['pz']
+        self.walls = self.concat_walls(json_data['links'])
 
 
 class wall:
@@ -38,24 +54,24 @@ class wall:
                  subwall_data[str(i)] = float(subwall_data[str(i)])
 
             centroid_yaw = float(wall.centroid_yaw)
-            self.yaw = centroid_yaw
 
-            subwall_yaw = np.arctan2(subwall_data['py'],subwall_data['py'])
-            cos , sin = np.cos(subwall_yaw), np.sin(subwall_yaw)
+            self.yaw = centroid_yaw
+            cos , sin = np.cos(self.yaw), np.sin(self.yaw)
             rotation_matrix = np.array(((cos,-sin),(sin,cos)))
 
             centroid = centroid_x + subwall_data['px'] , centroid_y + subwall_data['py']
 
+            #set intial values of p1,p2,p3,p4
             self.p1 = centroid[0] - subwall_data['gx']/2 , centroid[1] - subwall_data['gy']/2
             self.p2 = centroid[0] + subwall_data['gx']/2 , centroid[1] - subwall_data['gy']/2
             self.p3 = centroid[0] - subwall_data['gx']/2 , centroid[1] + subwall_data['gy']/2
             self.p4 = centroid[0] + subwall_data['gx']/2 , centroid[1] + subwall_data['gy']/2
 
+            #rotate the points
             self.p1 = np.dot(rotation_matrix,self.p1)
             self.p2 = np.dot(rotation_matrix,self.p2)
             self.p3 = np.dot(rotation_matrix,self.p3)
             self.p4 = np.dot(rotation_matrix,self.p4)
-
 
         def set(self,subwall_data,wall):
             if self.relative_coord_to_global_coord(subwall_data,wall) != False:
@@ -67,9 +83,17 @@ class wall:
                 return False
 
 
+        def get_min_max(self):
+            point_arr_x = [self.p1[0],self.p2[0],self.p3[0],self.p4[0]]
+            point_arr_y = [self.p1[1],self.p2[1],self.p3[1],self.p4[1]]
 
-    def convert_to_border(self,jdata):
-        subwalls_original = jdata['subwalls']
+            return min(point_arr_x),min(point_arr_y),max(point_arr_x),max(point_arr_y)
+
+
+
+
+    def convert_to_border(self,json_data):
+        subwalls_original = json_data['subwalls']
 
         #gz, gy, gz are the lengths of the entire sides
         #px,py,pz are relative to the parent centroid
@@ -82,13 +106,14 @@ class wall:
             #if pre_append.set(subwalls_original[i],self.centroid_x,self.centroid_y,self.centroid_z,self.centroid_yaw) != False:
                 subwalls.append(pre_append)
 
-
         return subwalls
 
-    def __init__(self,json_data):
-        self.centroid_x = float(json_data['px'])
-        self.centroid_y = float(json_data['py'])
-        self.centroid_z = float(json_data['pz'])
+    def __init__(self,json_data,floor_data):
+
+        #pass the
+        self.centroid_x = float(json_data['px']) + float(floor_data.centroid_x)
+        self.centroid_y = float(json_data['py']) + float(floor_data.centroid_y)
+        self.centroid_z = float(json_data['pz']) + float(floor_data.centroid_z)
         self.centroid_yaw = float(json_data['yaw'])
         self.subwalls = self.convert_to_border(json_data)
 
@@ -103,23 +128,43 @@ if __name__ == "__main__":
 
     # converting subwal position relative to centroid
     # to the global coordinate system in gazebo
-    walls = []
-    for i in range(len(wall_data)):
-        #print 'wall : ', i
-        walls.append(wall(wall_data[i]))
+    my_floors = []
+    for a_floor in wall_data:
+        my_floors.append(floor(a_floor))
 
-    # converting python object information into
-    # yaml file
-    count = 0
+
+
     yaml_file = open('walls.yaml','w+')
-    for i in range(len(walls)):
-        for j in range(len(walls[i].subwalls)):
-            subs = walls[i].subwalls[j]
+    count = 0
 
-            yaml_file.write(yaml.dump({ str(count) : {'yaw' : subs.yaw,
-                                                      'p1' : [subs.p1[0],subs.p1[1]],
-                                                      'p2' : [subs.p2[0],subs.p2[1]],
-                                                      'p3' : [subs.p3[0],subs.p3[1]],
-                                                      'p4' : [subs.p4[0],subs.p4[1]],
-                                                      }}))
-            count +=1
+    min_x = 0
+    min_y = 0
+    max_x = 0
+    max_y = 0
+    for a_floor in my_floors:
+        for centroid in a_floor.walls:
+            for subwall in centroid.subwalls:
+                yaml_file.write(yaml.dump({ count :{'yaw' : subwall.yaw,
+                                                    'p1' : [subwall.p1[0],subwall.p1[1]],
+                                                    'p2' : [subwall.p2[0],subwall.p2[1]],
+                                                    'p3' : [subwall.p3[0],subwall.p3[1]],
+                                                    'p4' : [subwall.p4[0],subwall.p4[1]],
+                                                    }}))
+                this_min_x, this_min_y,this_max_x,this_max_y = subwall.get_min_max()
+
+                if min_x > this_min_x:
+                    min_x = this_min_x
+                if min_y > this_min_y:
+                    min_y = this_min_y
+                if max_x < this_max_x:
+                    max_x = this_max_x
+                if max_y < this_max_y:
+                    max_y = this_max_y
+
+                count +=1
+
+    yaml_file.write(yaml.dump({ 'stats' :{'min_x',}}))# :{'min_x' : min_x ,
+                                        #    'max_x' : max_x ,
+                                        #    'min_y' : min_y ,
+                                        #    'max_y' : max_y ,
+                                        #    }}))
