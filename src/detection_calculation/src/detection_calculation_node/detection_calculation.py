@@ -2,24 +2,23 @@
 
 import rospy
 import yaml
-import sys
+#import sys
 import time
 import tf
 import numpy
-from rospy import ROSException
+#from rospy import ROSException
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
-from geometry_msgs.msg import Pose
+#from geometry_msgs.msg import Pose
 from detection_msgs.msg import CompiledFakeMessage
 from detection_msgs.msg import Human
 import math
+from sympy import Segment as Segment
 
 
 global MyHumans
 global init_robot_pose
-
-image_arr = []
 
 
 #Config file dictinary
@@ -27,6 +26,111 @@ MyHumans = yaml.load(open('/home/serl/sarwai-experiment-fd/human.yaml'))
 init_robot_pose = yaml.load(open('/home/serl/sarwai-experiment-fd/robot.yaml'))
 
 global max_distance
+
+class Wall():
+	def __init__(self, id, segment1 = Segment((0,0),(0,0)), segment2 = Segment((0,0),(0,0)), segment3 = Segment((0,0),(0,0)), segment4 = Segment((0,0),(0,0))):
+		self.id = id
+		self.segment1 = segment1
+		self.segment2 = segment2
+		self.segment3 = segment3
+		self.segment4 = segment4
+
+class QTreeNode():
+	def __init__(self, left_x, right_x, bottom_y, top_y):
+		self.edge_walls = []
+
+		self.left_x = left_x
+		self.right_x = right_x
+		self.top_y = top_y
+		self.bottom_y = bottom_y
+
+		self.tl = None
+		self.tr = None
+		self.bl = None
+		self.br = None
+	
+	def InsertWall(self, wall):
+		#get center point
+		diagonal = Segment((self.left_x, self.top_y), (self.right_x, self.bottom_y))
+		center_x = diagonal.midpoint.x
+		center_y = diagonal.midpoint.y
+
+		#Init subnodes
+		if self.tl == None:
+			self.tl = QTreeNode(self.left_x, center_x, center_y, top_y)
+			self.tr = QTreeNode(center_x, self.right_x, center_y, top_y)
+			self.bl = QTreeNode(self.left_x, center_x, self.bottom_y, center_y)
+			self.br = QTreeNode(center_x, right_x, bottom_y, center_y)
+		
+		nodes = []
+		wall_segments = [wall.segment1, wall.segment2, wall.segmnet3, wall.segment4]
+		
+		for seg in wall_segments:
+			# if segment exists in left nodes
+			if seg.p1.x <= center_x or seg.p2.x <= center_x:
+				# Check if segment exists in top node
+				if seg.p1.y >= center_y or seg.p2.y >= center_y:
+					nodes.append(self.tl)
+				# Check if segment exists in bottom node
+				if seg.p1.y <= center_y or seg.p2.y <= center_y:
+					nodes.append(self.bl)
+			# If segment exists in right nodes
+			if seg.p1.x >= center_x or seg.p2.x >= center_x:
+				# Check if segment exists in top node
+				if seg.p1.y >= center_y or seg.p2.y >= center_y:
+					nodes.append(self.tr)
+				# Check if segment exists in bottom node
+				if seg.p1.y <= center_y or seg.p2.y <= center_y:
+					nodes.append(self.br)
+		
+		if len(nodes) > 1:
+			#On edge, put in edge_walls
+			for node in nodes:
+				node.edge_walls.append(node)
+		else:
+			#Within a node, insert into the subnode
+			nodes[0].InsertWall(wall)
+
+class QTree():
+	def __init__(self, x_min, x_max, y_min, y_max):
+		self.root = QTreeNode(x_min, x_max, y_min, y_max)
+
+	def populate(self, walls):
+		for wall in walls:
+			self.root.InsertWall(wall)
+	
+	def GetReleventWallsShitty(self, robot_pos, robot_theta):
+		current_node = self.root
+		half_fov_angle = robot_fov / 2.0
+		leg_length = max_distance / math.cos(half_fov_angle)
+		fov = Triangle(robot_pos, (robot_pos[0] + leg_length*math.cos(robot_theta - half_fov_angle), robot_pos[1] + leg_length*math.sin(robot_theta - half_fov_angle)), (robot_pos[0] + leg_length*math.cos(robot_theta + half_fov_angle), robot_pos[1] + leg_length*math.sin(robot_theta + half_fov_angle)))
+		# Check if fov is hitting a center edge
+		while True:
+			#get center point
+			diagonal = Segment((current_node.left_x, current_node.top_y), (current_node.right_x, current_node.bottom_y))
+			center_x = diagonal.midpoint.x
+			center_y = diagonal.midpoint.y
+
+			node_vertical = Segment((center_x, current_node.top_y), (center_x, current_node.bottom_y))
+			node_horizontal = Segment((current_node.left_x, center_y), (current_node.right_x, center_y))
+			if len(node_vertical.intersection(fov) + node_horizontal(fov)) >= 0:
+				return current_node.GetChildWalls()
+			elif current_node.tl == None:
+				return []
+			else:
+				if robot_pos[0] < center_x:
+					if robot_pos[1] < center_y:
+						current_node = current_node.br
+					else:
+						current_node = current_node.tr
+				else:
+					if robot_pos[1] < center_y:
+						current_node = current_node.bl
+					else:
+						current_node = current_node.tl
+			
+
+global world_qtree
 
 def process():
 #RosLaunch Parameters
@@ -160,10 +264,8 @@ def find(RoboPosX, RoboPosY, RoboPosTh):
 				ret.append(man)
 	return ret
 
+def get_incident_walls(robot_pos, robot_theta):
+	return world_qtree.GetReleventWallsShitty(robot_pos, robot_theta)
 
 def main():
 	process()
-
-
-if __name__ == "__main__":
-	main()
