@@ -48,7 +48,7 @@ class QTreeNode():
 		self.tr = None
 		self.bl = None
 		self.br = None
-	
+
 	def InsertWall(self, wall):
 		#get center point
 		diagonal = Segment((self.left_x, self.top_y), (self.right_x, self.bottom_y))
@@ -61,10 +61,10 @@ class QTreeNode():
 			self.tr = QTreeNode(center_x, self.right_x, center_y, top_y)
 			self.bl = QTreeNode(self.left_x, center_x, self.bottom_y, center_y)
 			self.br = QTreeNode(center_x, right_x, bottom_y, center_y)
-		
+
 		nodes = []
 		wall_segments = [wall.segment1, wall.segment2, wall.segmnet3, wall.segment4]
-		
+
 		for seg in wall_segments:
 			# if segment exists in left nodes
 			if seg.p1.x <= center_x or seg.p2.x <= center_x:
@@ -82,7 +82,7 @@ class QTreeNode():
 				# Check if segment exists in bottom node
 				if seg.p1.y <= center_y or seg.p2.y <= center_y:
 					nodes.append(self.br)
-		
+
 		if len(nodes) > 1:
 			#On edge, put in edge_walls
 			for node in nodes:
@@ -98,7 +98,7 @@ class QTree():
 	def populate(self, walls):
 		for wall in walls:
 			self.root.InsertWall(wall)
-	
+
 	def GetReleventWallsShitty(self, robot_pos, robot_theta):
 		current_node = self.root
 		half_fov_angle = robot_fov / 2.0
@@ -128,7 +128,7 @@ class QTree():
 						current_node = current_node.bl
 					else:
 						current_node = current_node.tl
-			
+
 
 global world_qtree
 
@@ -162,7 +162,7 @@ def process():
 	pub = rospy.Publisher('sarwai_detection/custom_msgs_info', CompiledFakeMessage, queue_size=1000)
 
 	rospy.Subscriber('robot' + str(robot_number_) + '/odom', Odometry, Odometry_update, queue_size=1)
-	
+
 	rospy.Subscriber('coffee', String, Force_update, queue_size = 1)
 
 	rospy.spin()
@@ -255,7 +255,7 @@ def find(RoboPosX, RoboPosY, RoboPosTh):
 			fov_offset = (robot_fov / 2.0) - FOV_MARGIN
 
 			# If the human has an angle less than half the robot's FOV (fov_offset)...
-			if (human_angle <= fov_offset ) and (human_angle >= (fov_offset * -1)) and (MyHumans[human_num]['dclass'] != 2):
+			if (human_angle <= fov_offset ) and (human_angle >= (fov_offset * -1)) and (MyHumans[human_num]['dclass'] != 2) and in_view(RoboPosX, RoboPosY, RoboPosTh, MyHumans[human_num]['x'], MyHumans[human_num]['y']):
 				man = Human()
 				man.id = i
 				man.dclass = MyHumans[human_num]['dclass']
@@ -266,6 +266,17 @@ def find(RoboPosX, RoboPosY, RoboPosTh):
 
 def get_incident_walls(robot_pos, robot_theta):
 	return world_qtree.GetReleventWallsShitty(robot_pos, robot_theta)
+
+def in_view(RoboPosX, RoboPosY,RoboPosTh,HumanX,HumanY):
+	line_of_sight = sympy.Segment((RoboPosX,RoboPosY),(HumanX,HumanY))
+	wall_segments = get_incident_walls( (RoboPosX,RoboPosY), RoboPosTh)
+	for segment in wall_segments:
+		if line_of_sight.intersection(segment) == []:
+			print line_of_sight.intersection(segment)
+			return False
+
+
+	return True
 
 def main():
 	process()
