@@ -48,9 +48,9 @@ def Odometry_update(data):
 
     humans_list = []
 
-    for id, human_data in humans_in_view_dict.iteritems():
+    for human_id, human_data in humans_in_view_dict.iteritems():
         human = Human()
-        human.id = id
+        human.id = int(human_id)
         human.dclass = human_data['dclass']
         human.angleToRobot = human_data['human_angle']
         human.distanceToRobot = human_data['distance_to_robot']
@@ -73,13 +73,15 @@ def Odometry_update(data):
 
 
 def main():
+    rospy.init_node("detection_calculation", anonymous=True)
+
     global mission_number
     mission_number = rospy.get_param('~mission_number')
     global robot_number
     robot_number = rospy.get_param('~robot_number')
 
     global init_robot_pose
-    init_robot_pose = yaml.load(open('robot.yaml'))
+    init_robot_pose = yaml.load(open('/home/serl/sarwai-experiment-fd/robot.yaml'))
 
     global robot_pos_x
     robot_pos_x = init_robot_pose[mission_number][str(robot_number)]['x']
@@ -97,10 +99,10 @@ def main():
     robot_fov = init_robot_pose[mission_number][str(robot_number)]['fov']
 
     global humans_dict
-    humans_dict = yaml.load(open('human.yaml'))
+    humans_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/human.yaml'))
 
     global walls_dict
-    walls_dict = yaml.load(open('walls.yaml'))
+    walls_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/walls.yaml'))
 
     global human_detector
     human_detector = human_finder.HumanFinder(walls_dict, humans_dict, depth_of_field, robot_fov, FOV_MARGIN)
@@ -108,8 +110,6 @@ def main():
     print('WAITING FOR GAZEBO')
     time.sleep(35)
     print("START CALCULATION")
-
-    rospy.init_node("detection_calculation", anonymous=True)
 
     global pub
     pub = rospy.Publisher('sarwai_detection/custom_msgs_info', CompiledFakeMessage, queue_size=1000)

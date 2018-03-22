@@ -28,11 +28,11 @@ class HumanFinder:
 
         return left, bottom, right, top
 
-    def field_of_view_filter(self, robot_x, robot_y, robot_angle, field_of_view, depth_of_field, humans_dict):
+    def field_of_view_filter(self, robot_x, robot_y, robot_angle, field_of_view, depth_of_field, humans_dict_indices):
         fov_filtered_humans_dict = {}
         # for id, human_x, human_y, dclass in humans_dict:
-        for id, human_data in humans_dict:
-
+        for human_id in humans_dict_indices:
+            human_data = self.humans_dict[str(human_id)]
             # Get the coordinates of the human relative to the robot
             hx, hy = shift_points(robot_x, robot_y, human_data['x'], human_data['y'])
 
@@ -54,7 +54,7 @@ class HumanFinder:
 
                 # If the human has an angle less than half the robot's FOV (fov_offset)...
                 if (human_angle <= fov_offset) and (human_angle >= (fov_offset * -1)) and human_data['dclass'] != 2:
-                    fov_filtered_humans_dict[id] = human_data
+                    fov_filtered_humans_dict[str(human_id)] = human_data
 
         return fov_filtered_humans_dict
 
@@ -62,8 +62,8 @@ class HumanFinder:
         left, bottom, right, top = self.get_robot_bounding_box(robot_x, robot_y, self.depth_of_field)
         nearby_walls = self.wall_spatial_indexer.search(left, bottom, right, top)
         nearby_humans = self.human_spatial_indexer.search(left, bottom, right, top)
-        nearby_humans_in_fov = self.field_of_view_filter(nearby_humans, robot_x, robot_y,
-                                                         robot_angle, self.depth_of_field)
+        nearby_humans_in_fov = self.field_of_view_filter(robot_x, robot_y,
+                                                         robot_angle, self.field_of_view, self.depth_of_field, nearby_humans)
 
         humans_seen_by_camera = {}
 
