@@ -9,7 +9,7 @@
   <machine name="station3" address="station3" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" />
   <machine name="azeroth" address="azeroth" user="serl" env-loader="/home/serl/Documents/detection/init-env.bash" /> -->
 
-	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+	<!-- <include file="$(find detection_calculation)/launch/fake_detection.launch">
 		<arg name="name" value="robot_detection_1" />
 		<arg name="mission_number" value="$(arg mission_string)" />
 		<arg name="robot_number" value="1" />
@@ -19,7 +19,7 @@
 		<arg name="name" value="robot_detection_2" />
 		<arg name="mission_number" value="$(arg mission_string)" />
 		<arg name="robot_number" value="2" />
-	</include>
+	</include> -->
 
 	<include file="$(find detection_calculation)/launch/fake_detection.launch">
 		<arg name="name" value="robot_detection_3" />
@@ -27,11 +27,11 @@
 		<arg name="robot_number" value="3" />
 	</include>
 
-	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+	<!-- <include file="$(find detection_calculation)/launch/fake_detection.launch">
 		<arg name="name" value="robot_detection_4" />
 		<arg name="mission_number" value="$(arg mission_string)" />
 		<arg name="robot_number" value="4" />
-	</include>
+	</include> -->
 
 	<node pkg="pseudo_tracker" type="pseudo_tracker_node" name="pseudo_tracker_node" output="screen"/>
 	

@@ -16,6 +16,7 @@ from detection_msgs.msg import Human
 import math
 from sympy import Segment as Segment
 from sympy import Triangle as Triangle
+from sympy import Point2D as Point
 
 import multiprocessing
 import os.path
@@ -37,7 +38,7 @@ walls_yaml = yaml.load(open('/home/serl/sarwai-experiment-fd/walls.yaml'))
 global max_distance
 
 class Wall():
-	def __init__(self, id = -1, segment1 = Segment((0,0),(0,0)), segment2 = Segment((0,0),(0,0)), segment3 = Segment((0,0),(0,0)), segment4 = Segment((0,0),(0,0))):
+	def __init__(self, id = -1, segment1 = Segment(Point(0,0, evaluate=False),Point(0,0,evaluate=False)), segment2 = Segment(Point(0,0, evaluate=False),Point(0,0, evaluate=False)), segment3 = Segment(Point(0,0, evaluate=False),Point(0,0, evaluate=False)), segment4 = Segment(Point(0,0, evaluate=False),Point(0,0, evaluate=False))):
 		self.id = id
 		self.segment1 = segment1
 		self.segment2 = segment2
@@ -54,27 +55,30 @@ counter = 0
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 pickle_loc = '/home/serl/sarwai-experiment-fd/src/detection_calculation/src/detection_calculation_node/wall_seg_pickle.obj'
-if not os.path.isfile(pickle_loc):
-	for wall_id,seg_list in walls_yaml.iteritems():
-		seg1 = Segment(tuple(seg_list['p1']), tuple(seg_list['p2']))
-		seg2 = Segment(tuple(seg_list['p2']), tuple(seg_list['p4']))
-		seg3 = Segment(tuple(seg_list['p3']), tuple(seg_list['p1']))
-		seg4 = Segment(tuple(seg_list['p4']), tuple(seg_list['p3']))
-		walls_list.append(Wall(wall_id, seg1, seg2, seg3, seg4))
+# if not os.path.isfile(pickle_loc):
+for wall_id,seg_list in walls_yaml.iteritems():
+	seg1 = Segment(Point(seg_list['p1'][0], seg_list['p1'][1], evaluate=False), Point(seg_list['p2'][0], seg_list['p2'][1], evaluate=False))
+	seg2 = Segment(Point(seg_list['p2'][0], seg_list['p2'][1], evaluate=False), Point(seg_list['p4'][0], seg_list['p4'][1], evaluate=False))
+	seg3 = Segment(Point(seg_list['p3'][0], seg_list['p3'][1], evaluate=False), Point(seg_list['p1'][0], seg_list['p1'][1], evaluate=False))
+	seg4 = Segment(Point(seg_list['p4'][0], seg_list['p4'][1], evaluate=False), Point(seg_list['p3'][0], seg_list['p3'][1], evaluate=False))
+	# seg2 = Segment(tuple(seg_list['p2']), tuple(seg_list['p4']))
+	# seg3 = Segment(tuple(seg_list['p3']), tuple(seg_list['p1']))
+	# seg4 = Segment(tuple(seg_list['p4']), tuple(seg_list['p3']))
+	walls_list.append(Wall(wall_id, seg1, seg2, seg3, seg4))
 
-	with open('wall_seg_pickle.obj', 'w') as pickle_dest:
-		pickle.dump(walls_list,pickle_dest)
+	# with open(pickle_loc, 'w') as pickle_dest:
+	# 	pickle.dump(walls_list,pickle_dest)
 
-	print 'done parsing'
-else:
-	print 'File found successfully'
+	# print 'done parsing'
+# else:
+# 	print 'File found successfully'
 
-with open(pickle_loc) as pickle_src:
-	walls_list = pickle.load(pickle_src) 
+# with open(pickle_loc) as pickle_src:
+# 	walls_list = pickle.load(pickle_src) 
 
 # print walls_list
 
-
+print 'QTreeNode Class'
 
 class QTreeNode():
 	def __init__(self, left_x, right_x, bottom_y, top_y):
@@ -92,7 +96,7 @@ class QTreeNode():
 
 	def InsertWall(self, wall):
 		#get center point
-		diagonal = Segment((self.left_x, self.top_y), (self.right_x, self.bottom_y))
+		diagonal = Segment(Point(self.left_x, self.top_y, evaluate=False), Point(self.right_x, self.bottom_y, evaluate=False))
 		center_x = diagonal.midpoint.x
 		center_y = diagonal.midpoint.y
 
@@ -110,34 +114,37 @@ class QTreeNode():
 			# if segment exists in left nodes
 			if seg.p1.x <= center_x or seg.p2.x <= center_x:
 				# Check if segment exists in top node
-				if seg.p1.y >= center_y or seg.p2.y >= center_y:
+				if (seg.p1.y >= center_y or seg.p2.y >= center_y) and not (self.tl in nodes):
 					nodes.append(self.tl)
 				# Check if segment exists in bottom node
-				if seg.p1.y <= center_y or seg.p2.y <= center_y:
+				if (seg.p1.y <= center_y or seg.p2.y <= center_y) and not (self.bl in nodes):
 					nodes.append(self.bl)
 			# If segment exists in right nodes
 			if seg.p1.x >= center_x or seg.p2.x >= center_x:
 				# Check if segment exists in top node
-				if seg.p1.y >= center_y or seg.p2.y >= center_y:
+				if (seg.p1.y >= center_y or seg.p2.y >= center_y) and not (self.tr in nodes):
 					nodes.append(self.tr)
 				# Check if segment exists in bottom node
-				if seg.p1.y <= center_y or seg.p2.y <= center_y:
+				if (seg.p1.y <= center_y or seg.p2.y <= center_y) and not (self.br in nodes):
 					nodes.append(self.br)
 
 		if len(nodes) > 1:
 			#On edge, put in edge_walls
-			for node in nodes:
-				node.edge_walls.append(wall)
+			# for node in nodes:
+			# 	node.edge_walls.append(wall)
+			self.edge_walls.append(wall)
 		else:
 			#Within a node, insert into the subnode
 			nodes[0].InsertWall(wall)
 
 	def GetChildWalls(self):
 		ret = self.edge_walls[:]
-		print len(ret)
 		if self.tl != None:
 			ret += self.tl.GetChildWalls()[:] + self.tr.GetChildWalls()[:] + self.bl.GetChildWalls()[:] + self.br.GetChildWalls()[:]
+		print len(ret)
 		return ret
+
+print 'QTree class'
 
 class QTree():
 	def __init__(self, x_min, x_max, y_min, y_max):
@@ -155,12 +162,12 @@ class QTree():
 		# Check if fov is hitting a center edge
 		while True:
 			#get center point
-			diagonal = Segment((current_node.left_x, current_node.top_y), (current_node.right_x, current_node.bottom_y))
+			diagonal = Segment(Point(current_node.left_x, current_node.top_y, evaluate=False), Point(current_node.right_x, current_node.bottom_y, evaluate=False))
 			center_x = diagonal.midpoint.x
 			center_y = diagonal.midpoint.y
 
-			node_vertical = Segment((center_x, current_node.top_y), (center_x, current_node.bottom_y))
-			node_horizontal = Segment((current_node.left_x, center_y), (current_node.right_x, center_y))
+			node_vertical = Segment(Point(center_x, current_node.top_y, evaluate=False), Point(center_x, current_node.bottom_y, evaluate=False))
+			node_horizontal = Segment(Point(current_node.left_x, center_y, evaluate=False), Point(current_node.right_x, center_y, evaluate=False))
 			if len(node_vertical.intersection(fov) + node_horizontal.intersection(fov)) >= 0:
 				return current_node.GetChildWalls()
 			elif current_node.tl == None:
@@ -177,9 +184,12 @@ class QTree():
 					else:
 						current_node = current_node.tl
 
+print 'Global qtree'
 
 global world_qtree
 world_qtree = QTree(x_min=-166.0, x_max=166.0, y_min=-148.0, y_max=168)
+
+print 'functions'
 
 def process():
 #RosLaunch Parameters
@@ -322,25 +332,27 @@ def get_incident_walls(robot_pos, robot_theta):
 
 
 def in_view(RoboPosX, RoboPosY,RoboPosTh,HumanX,HumanY):
-	line_of_sight = Segment((RoboPosX,RoboPosY),(HumanX,HumanY))
-	wall_segments = [] # get_incident_walls( (RoboPosX,RoboPosY), RoboPosTh)
-	from rtree import index
-
+	line_of_sight = Segment(Point(RoboPosX,RoboPosY, evaluate=False), Point(HumanX,HumanY, evaluate=False))
+	wall_segments = get_incident_walls( (RoboPosX,RoboPosY), RoboPosTh)
 	segments = []
-	for wall in wall_list:
+	i = 0
+	for wall in wall_segments:
 		segments.append(wall.segment1)
 		segments.append(wall.segment2)
 		segments.append(wall.segment3)
 		segments.append(wall.segment4)
 
 		for segment in segments:
-			if line_of_sight.intersection(segment) == []:
+			if line_of_sight.intersection(segment) != []:
 				# print line_of_sight.intersection(segment)
-				return True
+				print 'returning false'
+				return False
+		print 'iterating ' + str(i)
+		i += 1
 		segments = []
 
-
-	return False
+	print 'returning true'
+	return True
 
 def main():
 	process()
