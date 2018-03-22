@@ -29,11 +29,12 @@ class HumanFinder:
         return left, bottom, right, top
 
     def field_of_view_filter(self, robot_x, robot_y, robot_angle, field_of_view, depth_of_field, humans_dict):
-        fov_filtered_humans_dict = []
-        for id, human_x, human_y, dclass in humans_dict:
+        fov_filtered_humans_dict = {}
+        # for id, human_x, human_y, dclass in humans_dict:
+        for id, human_data in humans_dict:
 
             # Get the coordinates of the human relative to the robot
-            hx, hy = shift_points(robot_x, robot_y, human_x, human_y)
+            hx, hy = shift_points(robot_x, robot_y, human_data['x'], human_data['y'])
 
             # Get the distance between the humann and the robot
             dist = cartesian_to_polar_distance(hx, hy)
@@ -45,11 +46,15 @@ class HumanFinder:
                 # Get the new angle between the robot and the human
                 human_angle = cartesian_to_polar_angle(relHX, relHY)
 
+                human_data['human_angle'] = human_angle
+
+                human_data['distance_to_robot'] = dist
+
                 fov_offset = (field_of_view/ 2.0) - self.field_of_view_margin
 
                 # If the human has an angle less than half the robot's FOV (fov_offset)...
-                if (human_angle <= fov_offset) and (human_angle >= (fov_offset * -1)) and dclass != 2:
-                    fov_filtered_humans_dict[id] = humans_dict[id]
+                if (human_angle <= fov_offset) and (human_angle >= (fov_offset * -1)) and human_data['dclass'] != 2:
+                    fov_filtered_humans_dict[id] = human_data
 
         return fov_filtered_humans_dict
 
@@ -59,8 +64,12 @@ class HumanFinder:
         nearby_humans = self.human_spatial_indexer.search(left, bottom, right, top)
         nearby_humans_in_fov = self.field_of_view_filter(nearby_humans, robot_x, robot_y,
                                                          robot_angle, self.depth_of_field)
-        for human in nearby_humans_in_fov:
-            for wall in nearby_walls:
+
+        humans_seen_by_camera = {}
+
+        for human_id, human_data in nearby_humans_in_fov.iteritems():
+            for wall_index in nearby_walls:
+                wall = self.walls_dict[wall_index]
                 yaw = wall['yaw']
 
                 if yaw == 0:
@@ -79,8 +88,12 @@ class HumanFinder:
                     tl = wall['p2']
                     br = wall['p3']
 
-                if self.wall_intersects_view_to_human(human['x'], human['y'], tl, br, robot_x, robot_y):
+                if self.wall_intersects_view_to_human(human_data['x'], human_data['y'], tl, br, robot_x, robot_y):
                     break
+
+            humans_seen_by_camera[human_id] = human_data
+
+        return humans_seen_by_camera
 
     def _on_segment(self, p, q, r):
         if q[0] <= max(p[0], r[0]) and q[0] >= min(p[0], r[0]) and q[1] <= max(p[1], r[1]) and q[1] >= min(p[1], r[1]):

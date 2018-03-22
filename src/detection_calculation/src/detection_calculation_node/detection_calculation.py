@@ -46,9 +46,22 @@ def Odometry_update(data):
 
     humans_in_view_dict = human_detector.find_people_in_view(new_x_pos, new_y_pos, new_th_pos)
 
+    humans_list = []
+
+    for id, human_data in humans_in_view_dict.iteritems():
+        human = Human()
+        human.id = id
+        human.dclass = human_data['dclass']
+        human.angleToRobot = human_data['human_angle']
+        human.distanceToRobot = human_data['distance_to_robot']
+
+        humans_list.append(human)
+
+
+
     # Msgs being set and released
     new_message = CompiledFakeMessage()
-    new_message.humans = human_list
+    new_message.humans = humans_list
     new_message.header.stamp = rospy.Time.now()
     new_message.robot = robot_number
     # float
