@@ -15,25 +15,66 @@ from detection_msgs.msg import CompiledFakeMessage
 from detection_msgs.msg import Human
 import math
 from sympy import Segment as Segment
+from sympy import Triangle as Triangle
+
+import multiprocessing
+import os.path
+
+import pickle
+
 
 
 global MyHumans
 global init_robot_pose
 
+print "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS SS SS"
 
 #Config file dictinary
 MyHumans = yaml.load(open('/home/serl/sarwai-experiment-fd/human.yaml'))
 init_robot_pose = yaml.load(open('/home/serl/sarwai-experiment-fd/robot.yaml'))
+walls_yaml = yaml.load(open('/home/serl/sarwai-experiment-fd/walls.yaml'))
 
 global max_distance
 
 class Wall():
-	def __init__(self, id, segment1 = Segment((0,0),(0,0)), segment2 = Segment((0,0),(0,0)), segment3 = Segment((0,0),(0,0)), segment4 = Segment((0,0),(0,0))):
+	def __init__(self, id = -1, segment1 = Segment((0,0),(0,0)), segment2 = Segment((0,0),(0,0)), segment3 = Segment((0,0),(0,0)), segment4 = Segment((0,0),(0,0))):
 		self.id = id
 		self.segment1 = segment1
 		self.segment2 = segment2
 		self.segment3 = segment3
 		self.segment4 = segment4
+
+#Generate list of Walls
+global walls_list
+walls_list = []
+
+global counter 
+counter = 0
+
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+pickle_loc = '/home/serl/sarwai-experiment-fd/src/detection_calculation/src/detection_calculation_node/wall_seg_pickle.obj'
+if not os.path.isfile(pickle_loc):
+	for wall_id,seg_list in walls_yaml.iteritems():
+		seg1 = Segment(tuple(seg_list['p1']), tuple(seg_list['p2']))
+		seg2 = Segment(tuple(seg_list['p2']), tuple(seg_list['p4']))
+		seg3 = Segment(tuple(seg_list['p3']), tuple(seg_list['p1']))
+		seg4 = Segment(tuple(seg_list['p4']), tuple(seg_list['p3']))
+		walls_list.append(Wall(wall_id, seg1, seg2, seg3, seg4))
+
+	with open('wall_seg_pickle.obj', 'w') as pickle_dest:
+		pickle.dump(walls_list,pickle_dest)
+
+	print 'done parsing'
+else:
+	print 'File found successfully'
+
+with open(pickle_loc) as pickle_src:
+	walls_list = pickle.load(pickle_src) 
+
+# print walls_list
+
+
 
 class QTreeNode():
 	def __init__(self, left_x, right_x, bottom_y, top_y):
@@ -57,13 +98,13 @@ class QTreeNode():
 
 		#Init subnodes
 		if self.tl == None:
-			self.tl = QTreeNode(self.left_x, center_x, center_y, top_y)
-			self.tr = QTreeNode(center_x, self.right_x, center_y, top_y)
+			self.tl = QTreeNode(self.left_x, center_x, center_y, self.top_y)
+			self.tr = QTreeNode(center_x, self.right_x, center_y, self.top_y)
 			self.bl = QTreeNode(self.left_x, center_x, self.bottom_y, center_y)
-			self.br = QTreeNode(center_x, right_x, bottom_y, center_y)
+			self.br = QTreeNode(center_x, self.right_x, self.bottom_y, center_y)
 
 		nodes = []
-		wall_segments = [wall.segment1, wall.segment2, wall.segmnet3, wall.segment4]
+		wall_segments = [wall.segment1, wall.segment2, wall.segment3, wall.segment4]
 
 		for seg in wall_segments:
 			# if segment exists in left nodes
@@ -86,10 +127,17 @@ class QTreeNode():
 		if len(nodes) > 1:
 			#On edge, put in edge_walls
 			for node in nodes:
-				node.edge_walls.append(node)
+				node.edge_walls.append(wall)
 		else:
 			#Within a node, insert into the subnode
 			nodes[0].InsertWall(wall)
+
+	def GetChildWalls(self):
+		ret = self.edge_walls[:]
+		print len(ret)
+		if self.tl != None:
+			ret += self.tl.GetChildWalls()[:] + self.tr.GetChildWalls()[:] + self.bl.GetChildWalls()[:] + self.br.GetChildWalls()[:]
+		return ret
 
 class QTree():
 	def __init__(self, x_min, x_max, y_min, y_max):
@@ -113,7 +161,7 @@ class QTree():
 
 			node_vertical = Segment((center_x, current_node.top_y), (center_x, current_node.bottom_y))
 			node_horizontal = Segment((current_node.left_x, center_y), (current_node.right_x, center_y))
-			if len(node_vertical.intersection(fov) + node_horizontal(fov)) >= 0:
+			if len(node_vertical.intersection(fov) + node_horizontal.intersection(fov)) >= 0:
 				return current_node.GetChildWalls()
 			elif current_node.tl == None:
 				return []
@@ -131,9 +179,11 @@ class QTree():
 
 
 global world_qtree
+world_qtree = QTree(x_min=-166.0, x_max=166.0, y_min=-148.0, y_max=168)
 
 def process():
 #RosLaunch Parameters
+	print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^STARTING TO SLEEP BITCH')
 	time.sleep(35)
 	print("##########################START CALCULATION")
 	rospy.init_node("detection_calculation", anonymous=True)
@@ -154,6 +204,9 @@ def process():
 	global robot_fov
 	max_distance = init_robot_pose[mission_number_][str(robot_number_)]['dof']
 	robot_fov = init_robot_pose[mission_number_][str(robot_number_)]['fov']
+
+	world_qtree.populate(walls_list)
+	print 'PENIS'
 
 	global FOV_MARGIN
 	FOV_MARGIN = 0.087 / 2.0
@@ -267,16 +320,27 @@ def find(RoboPosX, RoboPosY, RoboPosTh):
 def get_incident_walls(robot_pos, robot_theta):
 	return world_qtree.GetReleventWallsShitty(robot_pos, robot_theta)
 
+
 def in_view(RoboPosX, RoboPosY,RoboPosTh,HumanX,HumanY):
-	line_of_sight = sympy.Segment((RoboPosX,RoboPosY),(HumanX,HumanY))
-	wall_segments = get_incident_walls( (RoboPosX,RoboPosY), RoboPosTh)
-	for segment in wall_segments:
-		if line_of_sight.intersection(segment) == []:
-			print line_of_sight.intersection(segment)
-			return False
+	line_of_sight = Segment((RoboPosX,RoboPosY),(HumanX,HumanY))
+	wall_segments = [] # get_incident_walls( (RoboPosX,RoboPosY), RoboPosTh)
+	from rtree import index
+
+	segments = []
+	for wall in wall_list:
+		segments.append(wall.segment1)
+		segments.append(wall.segment2)
+		segments.append(wall.segment3)
+		segments.append(wall.segment4)
+
+		for segment in segments:
+			if line_of_sight.intersection(segment) == []:
+				# print line_of_sight.intersection(segment)
+				return True
+		segments = []
 
 
-	return True
+	return False
 
 def main():
 	process()
