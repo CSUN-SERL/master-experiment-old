@@ -61,7 +61,26 @@ class HumanFinder:
                                                          robot_angle, self.depth_of_field)
         for human in nearby_humans_in_fov:
             for wall in nearby_walls:
-                break
+                yaw = wall['yaw']
+
+                if yaw == 0:
+                    tl = wall['p3']
+                    br = wall['p2']
+
+                if yaw == 1.5708:
+                    tl = wall['p4']
+                    br = wall['p1']
+
+                if yaw == -1.5708:
+                    tl = wall['p1']
+                    br = wall['p4']
+
+                if yaw == 3.14159:
+                    tl = wall['p2']
+                    br = wall['p3']
+
+                if self.wall_intersects_view_to_human(human['x'], human['y'], tl, br, robot_x, robot_y):
+                    break
 
     def _on_segment(self, p, q, r):
         if q[0] <= max(p[0], r[0]) and q[0] >= min(p[0], r[0]) and q[1] <= max(p[1], r[1]) and q[1] >= min(p[1], r[1]):
