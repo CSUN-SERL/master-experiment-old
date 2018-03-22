@@ -1,17 +1,14 @@
 import rtree
-import yaml
-
 
 
 class WallRtree:
+
     def search(self, left, bottom, right, top):
         return self.spatial_walls.intersection(((left, bottom, right, top)))
 
-    def __init__(self, wall_file):
-        walls_yaml = yaml.load(open(wall_file))
-
+    def __init__(self, walls_dict):
         self.spatial_walls = rtree.index.Index()
-        for wall_id, seg_list in walls_yaml.iteritems():
+        for wall_id, seg_list in walls_dict.iteritems():
             # tuples. [0] = x, [1] = y
             tl = seg_list['p3']
             br = seg_list['p2']
