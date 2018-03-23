@@ -60,7 +60,6 @@ class HumanFinder:
 
     def find_people_in_view(self, robot_x, robot_y, robot_angle):
         left, bottom, right, top = self.get_robot_bounding_box(robot_x, robot_y, self.depth_of_field)
-        nearby_walls = self.wall_spatial_indexer.search(left, bottom, right, top)
         nearby_humans = self.human_spatial_indexer.search(left, bottom, right, top)
         nearby_humans_in_fov = self.field_of_view_filter(robot_x, robot_y,
                                                          robot_angle, self.field_of_view, self.depth_of_field, nearby_humans)
@@ -69,8 +68,7 @@ class HumanFinder:
 
         for human_id, human_data in nearby_humans_in_fov.iteritems():
 
-            human_is_seen = True
-
+            nearby_walls = self.wall_spatial_indexer.search(left, bottom, right, top)
             for wall_index in nearby_walls:
                 wall = self.walls_dict[wall_index]
 
@@ -78,11 +76,8 @@ class HumanFinder:
                 br = wall['p3']
 
                 if self.wall_intersects_view_to_human(human_data['x'], human_data['y'], tl, br, robot_x, robot_y):
-
-                    human_is_seen = False
                     break
-
-            if human_is_seen:
+            else:
                 humans_seen_by_camera[human_id] = human_data
 
         return humans_seen_by_camera
