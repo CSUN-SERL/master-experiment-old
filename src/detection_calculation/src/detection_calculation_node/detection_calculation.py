@@ -51,12 +51,13 @@ def Odometry_update(data):
     for human_id, human_data in humans_in_view_dict.iteritems():
         human = Human()
         human.id = int(human_id)
+        print human_id
         human.dclass = human_data['dclass']
         human.angleToRobot = human_data['human_angle']
         human.distanceToRobot = human_data['distance_to_robot']
 
         humans_list.append(human)
-
+    print '8======D'
 
 
     # Msgs being set and released
