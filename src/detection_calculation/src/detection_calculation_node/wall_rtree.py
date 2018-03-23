@@ -19,22 +19,24 @@ class WallRtree:
             right = br[0]
             bottom = br[1]
 
-            try:
-                if yaw == 0:
-                    self.spatial_walls.insert(int(wall_id), (left, bottom, right, top))
-
-                if yaw == 1.5708:
-                    self.spatial_walls.insert(int(wall_id), (top, left, bottom, right))
-
-                if yaw == -1.5708:
-                    self.spatial_walls.insert(int(wall_id), (bottom, right, top, left))
-
-                if yaw == 3.14159:
-                    self.spatial_walls.insert(int(wall_id), (right, top, left, bottom))
-
-                # print left, bottom, right, top
-                # suc_count += 1
-            except:
-                # self.spatial_walls.add(wall_id, ())
-                print "failed on: {}".format(wall_id)
-                exit(-1)
+            self.spatial_walls.insert(int(wall_id), (left, bottom, right, top))
+            #
+            # try:
+            #     if yaw == 0:
+            #         self.spatial_walls.insert(int(wall_id), (left, bottom, right, top))
+            #
+            #     if yaw == 1.5708:
+            #         self.spatial_walls.insert(int(wall_id), (top, left, bottom, right))
+            #
+            #     if yaw == -1.5708:
+            #         self.spatial_walls.insert(int(wall_id), (bottom, right, top, left))
+            #
+            #     if yaw == 3.14159:
+            #         self.spatial_walls.insert(int(wall_id), (right, top, left, bottom))
+            #
+            #     # print left, bottom, right, top
+            #     # suc_count += 1
+            # except:
+            #     # self.spatial_walls.add(wall_id, ())
+            #     print "failed on: {}".format(wall_id)
+            #     exit(-1)

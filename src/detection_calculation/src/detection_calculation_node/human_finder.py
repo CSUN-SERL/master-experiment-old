@@ -72,21 +72,8 @@ class HumanFinder:
                 wall = self.walls_dict[wall_index]
                 yaw = wall['yaw']
 
-                if yaw == 0:
-                    tl = wall['p3']
-                    br = wall['p2']
-
-                if yaw == 1.5708:
-                    tl = wall['p4']
-                    br = wall['p1']
-
-                if yaw == -1.5708:
-                    tl = wall['p1']
-                    br = wall['p4']
-
-                if yaw == 3.14159:
-                    tl = wall['p2']
-                    br = wall['p3']
+                tl = wall['p3']
+                br = wall['p2']
 
                 if self.wall_intersects_view_to_human(human_data['x'], human_data['y'], tl, br, robot_x, robot_y):
                     break
