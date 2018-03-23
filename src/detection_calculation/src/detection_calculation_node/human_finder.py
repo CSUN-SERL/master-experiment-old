@@ -68,17 +68,22 @@ class HumanFinder:
         humans_seen_by_camera = {}
 
         for human_id, human_data in nearby_humans_in_fov.iteritems():
+
+            human_is_seen = True
+
             for wall_index in nearby_walls:
                 wall = self.walls_dict[wall_index]
-                yaw = wall['yaw']
 
-                tl = wall['p3']
-                br = wall['p2']
+                tl = wall['p2']
+                br = wall['p3']
 
                 if self.wall_intersects_view_to_human(human_data['x'], human_data['y'], tl, br, robot_x, robot_y):
+
+                    human_is_seen = False
                     break
 
-            humans_seen_by_camera[human_id] = human_data
+            if human_is_seen:
+                humans_seen_by_camera[human_id] = human_data
 
         return humans_seen_by_camera
 
