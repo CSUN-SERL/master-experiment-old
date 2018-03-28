@@ -3,22 +3,32 @@ import tf
 import math
 import numpy
 
+import rospy
+from std_msgs.msg import Int32
+from detection_msgs.msg import HumanSeen
+# import harambe
+
 import wall_rtree
 import human_rtree
 from util import *
 
 
 class HumanFinder:
-    def __init__(self, walls_dict, humans_dict, depth_of_field, field_of_view, field_of_view_margin):
+    def __init__(self, walls_dict, humans_dict, depth_of_field, field_of_view, field_of_view_margin, robot_number):
         self.walls_dict = walls_dict
         self.humans_dict = humans_dict
 
         self.depth_of_field = depth_of_field
         self.field_of_view = field_of_view
         self.field_of_view_margin = field_of_view_margin
+        self.robot_number = robot_number
 
         self.wall_spatial_indexer = wall_rtree.WallRtree(walls_dict)
         self.human_spatial_indexer = human_rtree.HumanRTree(humans_dict)
+
+        self.human_sender = rospy.Publisher("/human_camera_seen", HumanSeen, queue_size=1000)
+
+        self.humans_sent = {}
 
     def get_robot_bounding_box(self, robot_x, robot_y, depth_of_field):
         left = robot_x - depth_of_field
@@ -28,7 +38,13 @@ class HumanFinder:
 
         return left, bottom, right, top
 
-    def field_of_view_filter(self, robot_x, robot_y, robot_angle, field_of_view, depth_of_field, humans_dict_indices):
+    def send_human_notification(self, human_id):
+        msg = HumanSeen()
+        msg.human_id = human_id
+        msg.robot_id = self.robot_number
+        self.human_sender.publish(msg)
+
+    def field_of_view_filter(self, robot_x, robot_y, robot_angle, field_of_view, depth_of_field, humans_dict_indices, force_detection):
         fov_filtered_humans_dict = {}
         # for id, human_x, human_y, dclass in humans_dict:
         for human_id in humans_dict_indices:
@@ -50,19 +66,29 @@ class HumanFinder:
 
                 human_data['distance_to_robot'] = dist
 
+                human_data['forced'] = False
+
                 fov_offset = (field_of_view/ 2.0) - self.field_of_view_margin
 
                 # If the human has an angle less than half the robot's FOV (fov_offset)...
-                if (human_angle <= fov_offset) and (human_angle >= (fov_offset * -1)) and human_data['dclass'] != 2:
+                if (human_angle <= fov_offset) and (human_angle >= (fov_offset * -1)) and (human_data['dclass'] != 2 or force_detection):
+                    if force_detection:
+                        self.humans_dict[str(human_id)]['dclass'] = 0
+                        human_data['forced'] = True
                     fov_filtered_humans_dict[str(human_id)] = human_data
+                
+                elif human_data['dclass'] == 2 and str(human_id) not in self.humans_sent:
+                    self.send_human_notification(human_id)
+                    self.humans_sent[str(human_id)] = True
+
 
         return fov_filtered_humans_dict
 
-    def find_people_in_view(self, robot_x, robot_y, robot_angle):
+    def find_people_in_view(self, robot_x, robot_y, robot_angle, force_detection):
         left, bottom, right, top = self.get_robot_bounding_box(robot_x, robot_y, self.depth_of_field)
         nearby_humans = self.human_spatial_indexer.search(left, bottom, right, top)
         nearby_humans_in_fov = self.field_of_view_filter(robot_x, robot_y,
-                                                         robot_angle, self.field_of_view, self.depth_of_field, nearby_humans)
+                                                         robot_angle, self.field_of_view, self.depth_of_field, nearby_humans, force_detection)
 
         humans_seen_by_camera = {}
 

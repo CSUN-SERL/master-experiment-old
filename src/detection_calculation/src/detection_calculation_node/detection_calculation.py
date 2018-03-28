@@ -17,11 +17,7 @@ global FOV_MARGIN
 FOV_MARGIN = 0.087 / 2.0
 
 
-def Force_update(data):
-    print("Got force")
-
-
-def Odometry_update(data):
+def Odometry_update(data, force_detection=False):
     # Getting x and z change for robot
     x = data.pose.pose.position.x * -1
     y = data.pose.pose.position.y * -1
@@ -44,21 +40,19 @@ def Odometry_update(data):
     # O(n) search
     # humans within fov
 
-    humans_in_view_dict = human_detector.find_people_in_view(new_x_pos, new_y_pos, new_th_pos)
+    humans_in_view_dict = human_detector.find_people_in_view(new_x_pos, new_y_pos, new_th_pos, force_detection)
 
     humans_list = []
 
     for human_id, human_data in humans_in_view_dict.iteritems():
         human = Human()
         human.id = int(human_id)
-        print human_id
         human.dclass = human_data['dclass']
         human.angleToRobot = human_data['human_angle']
         human.distanceToRobot = human_data['distance_to_robot']
+        human.forced = human_data['forced']
 
         humans_list.append(human)
-    print '8======D'
-
 
     # Msgs being set and released
     new_message = CompiledFakeMessage()
@@ -72,6 +66,14 @@ def Odometry_update(data):
                                              timeout=None)
     pub.publish(new_message)
 
+def Force_update(data):
+    print "got force"
+    if int(data.data) == robot_number:
+        print "forcing"
+        odom_data = rospy.wait_for_message('/robot' + str(robot_number) + '/odom', Odometry, timeout=None)
+        print 'got odom data'
+        Odometry_update(odom_data, force_detection=True)
+        print 'ran it'
 
 def main():
     rospy.init_node("detection_calculation", anonymous=True)
@@ -106,9 +108,9 @@ def main():
     walls_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/walls.yaml'))
 
     global human_detector
-    human_detector = human_finder.HumanFinder(walls_dict, humans_dict, depth_of_field, robot_fov, FOV_MARGIN)
+    human_detector = human_finder.HumanFinder(walls_dict, humans_dict, depth_of_field, robot_fov, FOV_MARGIN, robot_number)
 
-    print('WAITING FOR GAZEBO')
+    #print('WAITING FOR GAZEBO')
     time.sleep(35)
     print("START CALCULATION")
 
