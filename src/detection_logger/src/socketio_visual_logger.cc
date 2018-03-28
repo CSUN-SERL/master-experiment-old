@@ -2,6 +2,8 @@
 #include <sstream>
 #include <stdlib.h>
 
+#include "ros/ros.h"
+
 #include "socketio_visual_logger.h"
 
 namespace sarwai {
@@ -48,14 +50,38 @@ namespace sarwai {
 
   std::string SocketIOVisualLogger::GenerateJSONString(struct VisualDetectionData data, std::string image_filename) {
     std::stringstream json;
-    json << "{"
-    <<"\""<<"type"<<"\":" << "\"" << "visual-detection" << "\"" << "," 
-    <<"\""<<"timestamp"<<"\":" << "\"" << data.timestamp << "\"" << "," 
-    <<"\""<<"robotId"<<"\":" << "\"" << data.robot_id << "\"" << "," 
-    <<"\""<<"confidence"<<"\":" << "\"" << data.confidence_rating << "\"" << "," 
-    <<"\""<<"filePath"<<"\":" << "\"" << image_filename << "\"" 
-    <<"}";
+    json
+    << "{"
+      << "\"detection\":{"
+        << "\"category\":\"" << (data.human_id <= 290 ? "truePositive" : "falsePositive") << "\","
+        << "\"type\":\"visual-detection\","
+        << "\"data\":{"
+          << "\"confidence\":" << data.confidence_rating << ","
+          << "\"filePath\":\"" << image_filename << "\","
+          << "\"robotId\":"    << data.robot_id << ","
+          << "\"victimId\":"   << data.human_id
+        << "}"
+      << "}"
+    << "}";
 
     return json.str();
+  }
+
+  void SocketIOVisualLogger::SendHuman(unsigned human_id, unsigned robot_id, bool forced) {
+    std::stringstream json;
+    json
+    << "{"
+      << "\"detection\":{"
+        << "\"category\":\"" << (forced ? "manual" : "missed") << "\","
+        << "\"type\":\"visual-detection\","
+        << "\"data\":{"
+          << "\"confidence\":0,"
+          << "\"filePath\":\"null\","
+          << "\"robotId\":"    << robot_id << ","
+          << "\"victimId\":"   << human_id
+        << "}"
+      << "}"
+    << "}";
+    socket_client_.socket("/socket.io")->emit(visual_detection_event_name_, json.str());
   }
 }
