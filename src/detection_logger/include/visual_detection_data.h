@@ -7,6 +7,7 @@ namespace sarwai {
   struct VisualDetectionData {
     std::string object_class;
     float confidence_rating;
+    unsigned int human_id;
     int timestamp;
     int left_x_coord;
     int top_y_coord;
