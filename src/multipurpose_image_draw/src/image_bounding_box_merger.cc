@@ -44,6 +44,8 @@ namespace sarwai {
     queryMsg.image = imageCopy;
     queryMsg.robotId = msg->robot;
     queryMsg.bounding_box = box;
+    queryMsg.human_id = human.id;
+    queryMsg.forced = human.forced;
 
     this->m_visualDetectionPub.publish(queryMsg);
   }
