@@ -39,13 +39,18 @@ namespace sarwai {
 
   std::string SocketIOAudioLogger::GenerateJSONString(struct AudioDetectionData data) {
     std::stringstream json;
-    json << "{"
-    <<"\""<<"type"<<"\":" << "\"" <<"audio-detection"<<"\""<<","
-    << "\"" << "robotId" << "\":" << "\"" << data.robot_id << "\"" << ","
-    << "\"" << "timestamp" << "\":" << "\"" << data.timestamp << "\"" << ","
-    << "\"" << "confidence" << "\":" << "\"" << data.confidence << "\"" << ","
-    << "\"" << "transcript" << "\":" << "\"" << data.transcript << "\"" << ","
-    << "\"" << "filePath" << "\":" << "\"" << data.audio_filename << "\""
+    json
+    << "{"
+      << "\"detection\": {"
+        << "\"category\": \"" << (stoi(data.audio_filename.substr(5).substr(0, (data.audio_filename.length() == 10 ? 1 : 2))) <= 49 ? "truePositive" : "falsePositive") << "\","
+        << "\"type\": \"audio-detection\","
+        << "\"data\": { "
+          << "\"confidence\": \"" << data.confidence        << "\","
+          << "\"filePath\": \""   << data.audio_filename    << "\","
+          << "\"robotId" << "\":" << "\"" << data.robot_id  << "\","
+          << "\"victimId: -1"
+        << "}"
+      << "}"
     << "}";
 
     return json.str();
