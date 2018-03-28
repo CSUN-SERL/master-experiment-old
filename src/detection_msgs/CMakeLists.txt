@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
    AudioDetection.msg
    AudioFileReady.msg
    Human.msg
+   HumanSeen.msg
  )
 
 ## Generate added messages and services with any dependencies listed here

@@ -1,0 +1,2 @@
+uint32 human_id
+uint32 robot_id
