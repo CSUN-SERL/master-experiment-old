@@ -45,10 +45,10 @@ namespace sarwai {
         << "\"category\": \"" << (stoi(data.audio_filename.substr(5).substr(0, (data.audio_filename.length() == 10 ? 1 : 2))) <= 49 ? "truePositive" : "falsePositive") << "\","
         << "\"type\": \"audio-detection\","
         << "\"data\": { "
-          << "\"confidence\": \"" << data.confidence        << "\","
+          << "\"confidence\": "   << data.confidence        << ","
           << "\"filePath\": \""   << data.audio_filename    << "\","
-          << "\"robotId" << "\":" << "\"" << data.robot_id  << "\","
-          << "\"victimId: -1"
+          << "\"robotId\": "      << data.robot_id          << ","
+          << "\"victimId\": -1"
         << "}"
       << "}"
     << "}";
