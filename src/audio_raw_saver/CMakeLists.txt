@@ -3,12 +3,14 @@ project(audio_raw_saver)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  audio_common_msgs
+  # audio_common_msgs
   detection_msgs
 )
 
 catkin_python_setup()
 
 catkin_package(
-  CATKIN_DEPENDS audio_common_msgs detection_msgs
+  CATKIN_DEPENDS 
+  # audio_common_msgs
+  detection_msgs
 )
