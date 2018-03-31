@@ -39,7 +39,8 @@ int main(int argc, char **argv) {
 
 void LogVisualDetection(const detection_msgs::ProcessedVisualDetection::ConstPtr& msg) {
   // Convert ROS message to logging struct
-  std::cout << "***********************LOG VISUAL DETECTION" << std::endl;
+  // std::cout << "***********************LOG VISUAL DETECTION" << std::endl;
+  std::cout << "Visual detection " << (msg->human_id <= 290 ? "truePositive" : "falsePositive") << std::endl;
   struct VisualDetectionData data;
   data.box_height = msg->bounding_box.ymax - msg->bounding_box.ymin;
   data.box_width = msg->bounding_box.xmax - msg->bounding_box.xmin;
@@ -63,5 +64,6 @@ void LogVisualDetection(const detection_msgs::ProcessedVisualDetection::ConstPtr
 }
 
 void SendHumanViewed(const detection_msgs::HumanSeen::ConstPtr& msg) {
+  std::cout << "Visual detection missedDetection" << std::endl;
   socketio_logger.SendHuman(msg->human_id, msg->robot_id, false);
 }

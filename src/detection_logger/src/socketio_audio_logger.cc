@@ -21,7 +21,7 @@ namespace sarwai {
 
   void SocketIOAudioLogger::ReceiveQueryId(sio::event &queryIdEvent) {
     int query_id = queryIdEvent.get_message()->get_int();
-    std::cout << "received query id: " << query_id << "\n";
+    // std::cout << "received query id: " << query_id << "\n";
     std::stringstream iris_script_cmd;
     iris_script_cmd << "python ~/programming/sarwai/adaptation/clustering/evaluate.py " << query_id << " >> audio-iris-log.py";
     system(iris_script_cmd.str().c_str());
@@ -32,7 +32,8 @@ namespace sarwai {
   }
 
   void SocketIOAudioLogger::SendData(struct AudioDetectionData data) {
-    std::cout << "#################Sending audio query via socket.io################################" << std::endl;
+    // std::cout << "#################Sending audio query via socket.io################################" << std::endl;
+    std::cout << "Audio query" << std::endl;
     std::string json_data = GenerateJSONString(data);
     socket_client_.socket("/socket.io")->emit(audio_detection_event_name_, json_data);
   }

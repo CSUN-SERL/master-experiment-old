@@ -19,7 +19,7 @@ namespace sarwai {
     query_emit_event_name_ = "irisevaluatequery";
 
     std::string connection_string = host_addr_ + ":" + std::to_string(port_);
-    std::cout << connection_string << "\n";
+    // std::cout << connection_string << "\n";
     socket_client_.connect(connection_string);
     socket_client_.socket("/socket.io")->on("query-id",
         std::bind( &SocketIOVisualLogger::ReceiveQueryId, this, std::placeholders::_1));
@@ -31,20 +31,20 @@ namespace sarwai {
   }
 
   void SocketIOVisualLogger::Log(std::string image_filename, struct VisualDetectionData data) {
-    std::cout << "#################Sending visual query via socket.io################################" << std::endl;
+    // std::cout << "#################Sending visual query via socket.io################################" << std::endl;
     SendData(data, image_filename);
   }
 
   void SocketIOVisualLogger::ReceiveQueryId(sio::event &queryIdEvent) {
     int query_id = queryIdEvent.get_message()->get_int();
-    std::cout << "received query id: " << query_id << "\n";
+    // std::cout << "received query id: " << query_id << "\n";
     socket_client_.socket("/socket.io")->emit(query_emit_event_name_, std::to_string(query_id));
   }
 
   void SocketIOVisualLogger::SendData(struct VisualDetectionData data, std::string image_filename) {
     std::string json_data = GenerateJSONString(data, image_filename);
     std::string csv_data = GenerateStringCSV(data, image_filename);
-    std::cout << "JSON: " << json_data << "\n";
+    // std::cout << "JSON: " << json_data << "\n";
     socket_client_.socket("/socket.io")->emit(visual_detection_event_name_, json_data);
   }
 

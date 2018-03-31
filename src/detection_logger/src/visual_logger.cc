@@ -46,7 +46,7 @@ namespace sarwai {
     std::string csv_line = GenerateStringCSV(data, saved_image_filename);
     std::string full_text_log_filepath = log_filepath_ + boost::filesystem::path::preferred_separator + "visual-detections.csv";
     
-    std::cout << "Writing: " << csv_line << "To dir: " << full_text_log_filepath << "\n";
+    // std::cout << "Writing: " << csv_line << "To dir: " << full_text_log_filepath << "\n";
 
     std::ofstream outfile(full_text_log_filepath, std::ofstream::app | std::ofstream::out);
     if(!outfile.is_open()) {

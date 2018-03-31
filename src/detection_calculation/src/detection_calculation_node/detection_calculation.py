@@ -67,13 +67,10 @@ def Odometry_update(data, force_detection=False):
     pub.publish(new_message)
 
 def Force_update(data):
-    print "got force"
+    print "force detection"
     if int(data.data) == robot_number:
-        print "forcing"
         odom_data = rospy.wait_for_message('/robot' + str(robot_number) + '/odom', Odometry, timeout=None)
-        print 'got odom data'
         Odometry_update(odom_data, force_detection=True)
-        print 'ran it'
 
 def main():
     rospy.init_node("detection_calculation", anonymous=True)
