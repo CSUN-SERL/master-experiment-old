@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   sensor_msgs
-  darknet_ros_msgs
+  # darknet_ros_msgs
   message_generation
   genmsg
 )
@@ -37,7 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
    DEPENDENCIES
    std_msgs  # Or other packages containing msgs
    sensor_msgs
-   darknet_ros_msgs
+   # darknet_ros_msgs
  )
 
 catkin_package(
