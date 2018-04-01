@@ -108,7 +108,7 @@ def main():
     human_detector = human_finder.HumanFinder(walls_dict, humans_dict, depth_of_field, robot_fov, FOV_MARGIN, robot_number)
 
     #print('WAITING FOR GAZEBO')
-    time.sleep(35)
+    # time.sleep(35)
     print("START CALCULATION")
 
     global pub
