@@ -38,6 +38,7 @@ class Namespace(BaseNamespace):
         global pub
         rospy.loginfo('Message recieved: {}'.format(str(args[0])))
         rospy.loginfo('Toggled robot{}\'s autonomous control'.format(str(args[0])))
+        print(args[0])
         pub.publish(str(args[0]))
     '''
     def on_tester(self, *args):

@@ -14,9 +14,11 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from actionlib import SimpleActionClient, GoalStatus
 from geometry_msgs.msg import *
 from std_msgs.msg import String
+import helpers
 
 robot_number=4
 toggle = False
+start_or_stop = 'start'
 
 #initial position of the robot
 robotxOff = -4.8
@@ -67,7 +69,7 @@ def talker(x , y , z , w):
 
     if (toggle):
         rospy.loginfo("Robot 4 is set to manual control")
-        sleep(10)
+        time.sleep(10)
         talker(x ,y, z, w)
 
     #send goal
@@ -89,17 +91,51 @@ def talker(x , y , z , w):
         sac.cancel_goal()
         sac.send_goal(goal)
 
+'''
 def toggle_callback(data):
+
     global toggle
     global sac
 
     rospy.loginfo(data.data)
     if (robot_number == int(data.data)):
         toggle = not toggle
-        rospy.loginfo('Manual control of robot 4 has been set to {}.'.format(toggle))
+        rospy.loginfo('Manual control of robot 1 has been set to {}.'.format(toggle))
         if toggle:
             rospy.loginfo('Canceling goal')
         sac.cancel_goal()
+'''
+
+def toggle_callback(data):
+
+    global toggle
+    global sac
+    global start_or_stop
+
+    rospy.loginfo(data.data)
+    print(data.data)
+
+    start_or_stop, query_robot_id = helpers.stop_or_start_parse(data.data)
+ 
+   # if (isinstance(data.data, basestring)):
+   #   data_split = data.data.split('-')
+   #   start_or_stop = data_split[1]
+   #   query_robot_id = int(data_split[0])
+    
+    if (robot_number == int(query_robot_id)):
+        
+        
+        if start_or_stop == "stop":
+            # if the message contains 'stop' toggle the control to stop the publishing and cancel goals
+            rospy.loginfo('Stopping autonomous control')
+            toggle = True
+            rospy.loginfo('Canceling goal')
+            sac.cancel_goal()
+
+        if start_or_stop == "start":
+            # if the message contains start then change the toggle state to false
+            rospy.loginfo('Starting autonomous control')
+            toggle = False
 
 def callback(data):
     global robotx

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 from socketIO_client import BaseNamespace
@@ -13,7 +14,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from actionlib import SimpleActionClient, GoalStatus
 from geometry_msgs.msg import *
 from std_msgs.msg import String
-import helpers
+from functions import helpers 
 
 # added these
 robot_number=1
@@ -21,8 +22,8 @@ toggle = False
 start_or_stop = 'start'
 
 #initial position of the robot
-robotxOff = 1.6
-robotyOff = 60.3
+robotxOff = 0
+robotyOff = 11.2055587769
 robotx = 0
 roboty = 0
 sac = actionlib.SimpleActionClient('robot1/move_base', MoveBaseAction)
@@ -114,16 +115,16 @@ def toggle_callback(data):
     global start_or_stop
 
     rospy.loginfo(data.data)
-    print(data.data)
-
-    start_or_stop, query_robot_id = helpers.stop_or_start_parse(data.data)
- 
-   # if (isinstance(data.data, basestring)):
-   #   data_split = data.data.split('-')
-   #   start_or_stop = data_split[1]
-   #   query_robot_id = int(data_split[0])
     
-    if (robot_number == int(query_robot_id)):
+    if (isinstance(data.data, basestring)):
+      data_split = data.data.split('-')
+      start_or_stop = data_split[1]
+      query_robot_id = int(data_split[0])
+
+    if (helpers.is_json(data.data)):
+      start_or_stop, query_robot_id = helpers.start_or_stop_parse(data.data)
+    
+    if (robot_number == query_robot_id):
         
         
         if start_or_stop == "stop":

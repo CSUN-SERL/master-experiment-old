@@ -16,10 +16,11 @@ Author name: Emre Can Bulut
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <!-- <arg name="station_name" value="$(arg station_name)" /> -->
-        <arg name="use_sim_time" value="true"/>
+        <arg name="use_sim_time" value="false"/>
         <arg name="debug" value="false"/>
         <arg name="gui" value="true" />
         <arg name="world_name" value="$(find multirobot)/worlds/jacaranda_v4_v2_humans.world"/>
+				<arg name="verbose" value="true" />
     </include>
     
 
