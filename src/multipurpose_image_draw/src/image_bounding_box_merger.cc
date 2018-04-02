@@ -56,12 +56,13 @@ namespace sarwai {
     unsigned BOXWIDTH = 70;
     unsigned BOXHEIGHT = 0;
     float human_height = 1.70;
-	  unsigned yCoord = (image.height / 2) - (BOXWIDTH / 2);
 
-    BOXHEIGHT = unsigned((human_height / human.distanceToRobot) * 80);
-    if ( BOXHEIGHT < 100 )
-      BOXHEIGHT = 100;
 
+    BOXWIDTH = unsigned((human_height / human.distanceToRobot) * 80);
+    if ( BOXWIDTH < 70 )
+      BOXWIDTH = 70;
+
+    unsigned yCoord = (image.height / 2) - (BOXWIDTH / 2);
 
     //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXWIDTH / 2);
 
@@ -89,8 +90,8 @@ namespace sarwai {
     cv_bridge::CvImagePtr cvImage;
     cvImage = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
     cv::Mat imageMatrix = cvImage->image;
-    cv::Point topLeftCorner = cv::Point(movedXCoord, yCoord + BOXHEIGHT);
-    cv::Point bottomRightCorner = cv::Point(movedXCoord + BOXWIDTH, yCoord);
+    cv::Point topLeftCorner = cv::Point(movedXCoord, yCoord);
+    cv::Point bottomRightCorner = cv::Point(movedXCoord + BOXWIDTH, yCoord + BOXWIDTH);
     cv::rectangle(imageMatrix, topLeftCorner, bottomRightCorner, 50);
     image = *(cv_bridge::CvImage(image.header, "bgr8", imageMatrix).toImageMsg());
 
