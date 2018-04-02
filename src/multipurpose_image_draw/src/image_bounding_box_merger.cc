@@ -57,12 +57,12 @@ namespace sarwai {
     unsigned BOXHEIGHT = 0;
     float human_height = 1.7;
 
-    int box_size_multiplier = 180;
+    int box_size_multiplier = 200;
     BOXLENGTH =  static_cast<unsigned>((human_height / human.distanceToRobot) * box_size_multiplier);
     if ( BOXLENGTH < 70 )
       BOXLENGTH = 70;
 
-    BOXHEIGHT = static_cast<unsigned>(BOXLENGTH * 1.6);
+    BOXHEIGHT = static_cast<unsigned>(BOXLENGTH * 1);
     unsigned yCoord = (image.height / 2) + (BOXLENGTH / 2);
 
     //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXLENGTH / 2);
