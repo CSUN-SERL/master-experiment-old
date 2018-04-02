@@ -3,3 +3,13 @@ devel/
 importsrc/
 .catkin_workspace
 
+
+*.pyc
+
+*.ipynb
+
+src/detection_calculation/src/detection_calculation_node/dc_debug\.py
+
+src/detection_calculation/src/detection_calculation_node/penis\.py
+
+src/detection_calculation/src/detection_calculation_node/wall_seg_pickle\.obj
