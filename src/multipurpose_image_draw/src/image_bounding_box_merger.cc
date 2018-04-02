@@ -55,7 +55,7 @@ namespace sarwai {
 
     unsigned BOXLENGTH = 70;
     unsigned BOXHEIGHT = 0;
-    float human_height = 1.70;
+    float human_height = 1.7;
 
     int box_size_multiplier = 180;
     BOXLENGTH = (unsigned)((human_height / human.distanceToRobot) * box_size_multiplier);
