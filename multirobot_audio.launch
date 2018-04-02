@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+	<node pkg="audio_trigger_node" type="audio_trigger_node" name="audio_trigger_node" output="screen" />
+	<node pkg="audio_trigger_node" type="emulate_odom" name="odom_emulator" output="screen" />
+	<node pkg="detection_logger" type="audio_logger_node" name="audio_logger_node" output="screen"/>
+
+</launch>
