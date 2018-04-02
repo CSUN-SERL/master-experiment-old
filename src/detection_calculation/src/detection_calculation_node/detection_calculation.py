@@ -50,7 +50,7 @@ def Odometry_update(data, force_detection=False):
         human.dclass = human_data['dclass']
         human.angleToRobot = human_data['human_angle']
         human.distanceToRobot = human_data['distance_to_robot']
-        human.forced = human_data['forced']
+        human.forced = force_detection
 
         humans_list.append(human)
 
@@ -81,7 +81,7 @@ def main():
     robot_number = rospy.get_param('~robot_number')
 
     global init_robot_pose
-    init_robot_pose = yaml.load(open('/home/serl/sarwai-experiment-fd/robot.yaml'))
+    init_robot_pose = yaml.load(open('robot.yaml'))
 
     global robot_pos_x
     robot_pos_x = init_robot_pose[mission_number][str(robot_number)]['x']
@@ -99,10 +99,10 @@ def main():
     robot_fov = init_robot_pose[mission_number][str(robot_number)]['fov']
 
     global humans_dict
-    humans_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/human.yaml'))
+    humans_dict = yaml.load(open('human.yaml'))
 
     global walls_dict
-    walls_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/walls.yaml'))
+    walls_dict = yaml.load(open('walls.yaml'))
 
     global human_detector
     human_detector = human_finder.HumanFinder(walls_dict, humans_dict, depth_of_field, robot_fov, FOV_MARGIN, robot_number)
