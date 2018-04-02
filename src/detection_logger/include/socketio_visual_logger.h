@@ -18,6 +18,7 @@ namespace sarwai {
 
     void Log(cv::Mat image, struct VisualDetectionData);
     void Log(std::string image_filename, struct VisualDetectionData);
+    void SendHuman(unsigned human_id, unsigned robot_id, bool forced);
 
     private:
     std::string visual_detection_event_name_;

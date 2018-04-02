@@ -5,7 +5,8 @@ from time import sleep
 import yaml
 import random
 
-from nav_msgs.msg import Odometry
+# from nav_msgs.msg import Odometry
+from detection_msgs.msg import PseudoOdometry
 
 # Load the location information
 
@@ -40,55 +41,58 @@ def main():
     print "init node"
     rospy.init_node('odom_emulator')
 
-    print "Create publishers"
-    pubtopicOne = '/test/robot1/odometry/filtered'
-    global pubOne
-    pubOne = rospy.Publisher(pubtopicOne, Odometry, queue_size = 2)
+    print "Create publisher"
+    pubtopic = '/test/robot/odometry/filtered'
+    global pub
+    pub = rospy.Publisher(pubtopic, PseudoOdometry, queue_size = 2)
+    # pubtopicOne = '/test/robot1/odometry/filtered'
+    # global pubOne
+    # pubOne = rospy.Publisher(pubtopicOne, Odometry, queue_size = 2)
 
-    pubtopicTwo = '/test/robot2/odometry/filtered'
-    global pubTwo
-    pubTwo = rospy.Publisher(pubtopicTwo, Odometry, queue_size = 2)
+    # pubtopicTwo = '/test/robot2/odometry/filtered'
+    # global pubTwo
+    # pubTwo = rospy.Publisher(pubtopicTwo, Odometry, queue_size = 2)
 
-    pubtopicThree = '/test/robot3/odometry/filtered'
-    global pubThree
-    pubThree = rospy.Publisher(pubtopicThree, Odometry, queue_size = 2)
+    # pubtopicThree = '/test/robot3/odometry/filtered'
+    # global pubThree
+    # pubThree = rospy.Publisher(pubtopicThree, Odometry, queue_size = 2)
 
-    pubtopicFour = '/test/robot4/odometry/filtered'
-    global pubFour
-    pubFour = rospy.Publisher(pubtopicFour, Odometry, queue_size = 2)
+    # pubtopicFour = '/test/robot4/odometry/filtered'
+    # global pubFour
+    # pubFour = rospy.Publisher(pubtopicFour, Odometry, queue_size = 2)
 
     locationYaml = yaml.safe_load(open('location_test.yaml', 'r'))['locations'].values()
     queryOrder = random.sample(xrange(100), 100)
     orderIndex = 0
 
-    print "Main activated, sleeping"
-    sleep(10)
-    print "Done sleeping 1, sending odom"
+    # print "Main activated, sleeping"
+    # print "Done sleeping 1, sending odom"
     while True:
         if orderIndex >= len(queryOrder):
             break
         print "Sending next odometry message"
         nextQuery = locationYaml[queryOrder[orderIndex]]
-        msg = Odometry()
-        msg.pose.pose.position.x = nextQuery['x'] + 1
-        msg.pose.pose.position.y = nextQuery['y'] + 1
-        robotId = (queryOrder[orderIndex] % 4) + 1
-        print "sending to " + str(robotId)
-        print "query " + str(nextQuery['query'])
+        msg = PseudoOdometry()
+        msg.odom.pose.pose.position.x = nextQuery['x'] + 1
+        msg.odom.pose.pose.position.y = nextQuery['y'] + 1
+        msg.robotId = (queryOrder[orderIndex] % 4) + 1
+        # print "sending to " + str(msg.robotId)
+        # print "query " + str(nextQuery['query'])
 
-        if robotId == 1:
-            print "if 1"
-            pubOne.publish(msg)
-        elif robotId == 2:
-            print "if 2"
-            pubTwo.publish(msg)
-        elif robotId == 3:
-            print "if 3"
-            pubThree.publish(msg)
-        else:
-            print "if 4"
-            pubFour.publish(msg)
+        # if robotId == 1:
+        #     print "if 1"
+        #     pubOne.publish(msg)
+        # elif robotId == 2:
+        #     print "if 2"
+        #     pubTwo.publish(msg)
+        # elif robotId == 3:
+        #     print "if 3"
+        #     pubThree.publish(msg)
+        # else:
+        #     print "if 4"
+        #     pubFour.publish(msg)
+        pub.publish(msg)
         
         orderIndex += 1
-        print "Sleeping"
+        # print "Sleeping"
         sleep(10)

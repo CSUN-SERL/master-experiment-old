@@ -2,135 +2,120 @@
 
 import rospy
 import yaml
-import sys
-from rospy import ROSException
+import time
+
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Pose
-from new_detection_msgs.msg import CompiledMessage
-from new_detection_msgs.msg import Human
-import math
+from std_msgs.msg import String
+from detection_msgs.msg import CompiledFakeMessage
+from detection_msgs.msg import Human
+
+import human_finder
+from util import *
+
+global FOV_MARGIN
+FOV_MARGIN = 0.087 / 2.0
 
 
-global MyHumans
-global init_robot_pose
+def Odometry_update(data, force_detection=False):
+    # Getting x and z change for robot
+    x = data.pose.pose.position.x * -1
+    y = data.pose.pose.position.y * -1
 
-rospy.init_node('detection_calculation', anonymous=True)
+    # Getting the Quaternion info
+    xQ = data.pose.pose.orientation.x
+    yQ = data.pose.pose.orientation.y
+    zQ = data.pose.pose.orientation.z
+    wQ = data.pose.pose.orientation.w
 
-image_arr = []
+    # Converting quaternion to euler angle
+    xE, yE, zE = quaternion_to_euler_angle(xQ, yQ, zQ, wQ)
 
-human_msg_ = Human()
-compiled_msgs_ = CompiledMessage()
+    # Robot position constantly updated
+    new_x_pos = robot_pos_x + x
+    new_y_pos = robot_pos_y + y
+    new_th_pos = robot_pos_th + zE
 
-#RosLaunch Parameters
-mission_number_ = rospy.get_param('~mission_number')
-robot_number_ = rospy.get_param('~robot_number#')
+    # Searching for humans
+    # O(n) search
+    # humans within fov
 
-#Config file dictinary
-MyHumans = yaml.load(open('human.yaml'))
-init_robot_pose = yaml.load(open('robot.yaml'))
+    humans_in_view_dict = human_detector.find_people_in_view(new_x_pos, new_y_pos, new_th_pos, force_detection)
 
-robot_pos_x = init_robot_pose[str(mission_number_)][str(robot_number_)]['x']
-robot_pos_y = init_robot_pose[str(mission_number_)][str(robot_number_)]['y']
-robot_pos_th = init_robot_pose[str(mission_number_)][str(robot_number_)]['theta']
+    humans_list = []
 
+    for human_id, human_data in humans_in_view_dict.iteritems():
+        human = Human()
+        human.id = int(human_id)
+        human.dclass = human_data['dclass']
+        human.angleToRobot = human_data['human_angle']
+        human.distanceToRobot = human_data['distance_to_robot']
+        human.forced = human_data['forced']
 
-def process():
-  pub = rospy.Publisher('sarwai_detection/custom_msgs_info', CompiledMessage, queue_size=1000)
-  rospy.Subscriber('robot1/odom', Odometry, Odometry_update)
+        humans_list.append(human)
 
-  rospy.spin()
+    # Msgs being set and released
+    new_message = CompiledFakeMessage()
+    new_message.humans = humans_list
+    new_message.header.stamp = rospy.Time.now()
+    new_message.robot = robot_number
+    # float
+    new_message.fov = robot_fov
 
+    new_message.img = rospy.wait_for_message('/robot' + str(robot_number) + '/camera/rgb/image_raw', Image,
+                                             timeout=None)
+    pub.publish(new_message)
 
-def Odometry_update(data):
-	#Getting x and z change for robot
-	x = data.pose.pose.position.x
-	y = data.pose.pose.position.y
-
-	#Getting the Quaternion info
-	xQ = data.pose.pose.orientation.x
-	yQ = data.pose.pose.orientation.y
-	zQ = data.pose.pose.orientation.z
-	wQ = data.pose.pose.orientation.w
-
-	# Converting quaternion to euler angle
-	xE,yE,zE = quaternion_to_euler_angle(xQ,yQ,zQ,wQ)
-
-	#Robot position constantly updated
-	global robot_pos_x, robot_pos_y, robot_pos_th
-	robot_pos_x = robot_pos_x + x
-	robot_pos_y = robot_pos_y + y
-	robot_pos_th = robot_pos_th + zE
-
-	#Searching for humans
-	find(robot_pos_x, robot_pos_y, robot_pos_th)
-
-	#Msgs being set and released
-	compiled_msgs_.header.stamp = rospy.Time.now()
-	compiled_msgs_.img =  rospy.wait_for_message('/robot1/camera/rgb/image_raw', Image, timeout=None)
-	compiled_msgs_.robot = robot_number_
-	compiled_msgs_.fov = init_robot_pose[str(mission_number_)][str(robot_number_)]['fov']
-	pub.publish(compiled_msgs_)
-
-
-#Conversion Function 
-def quaternion_to_euler_angle(w, x, y, z):
-  ysqr = y * y
-
-  t0 = +2.0 * (w * x + y * z)
-  t1 = +1.0 - 2.0 * (x * x + ysqr)
-  X = math.atan2(t0, t1)
-
-  t2 = +2.0 * (w * y - z * x)
-  t2 = +1.0 if t2 > +1.0 else t2
-  t2 = -1.0 if t2 < -1.0 else t2
-  Y = math.asin(t2)
-
-  t3 = +2.0 * (w * z + x * y)
-  t4 = +1.0 - 2.0 * (ysqr + z * z)
-  Z = math.atan2(t3, t4)
-	
-  return X, Y, Z  
-
-
-def shift_points(RX,RY,HX,HY):
-	HX = HX - RX
-	HY = HY - RY
-
-	return 0,0,HX,HY
-
-
-def cartesian_to_polar_distance(x,y):
-  return math.sqrt(x**2 + y**2)
-
-
-#returning rad
-def cartesian_to_polar_angle(x,y):
-  return math.atan2(y/x)
-
-
-
-def find(RoboPosX, RoboPosY, RoboPosTh):
-	for i in range(0,291):
-		human_num = str(i)
-		dist = math.sqrt( (RoboPosX - MyHumans[human_num]['x'])**2 + (RoboPosY - MyHumans[human_num]['y'])**2)
-		if dist <= 0.5:  #dof
-			rx,ry,hx,hy = shift_points(robot_pos_x,robot_pos_y, MyHumans[human_num]['x'], MyHumans[human_num]['y'])
-			human_degree = math.degree(cartesian_to_polar_angle(hx, hy))
-			robot_degree = math.degree(RoboPosTh)
-			FOV_degree = math.degree(init_robot_pose[str(mission_number_)][str(robot_number_)]['fov'])/2.0		#field of view divided by two, relative to robot
-			if (human_degree <= robot_degree + FOV_degree ) and (human_degree >= robot_degree - FOV_degree and (MyHumans[str(i)]['dclass'] != 2)):
-				human_msg_.id = i
-				human_msg_.dclass = int(MyHumans[str(i)]['dclass'])
-				human_msg_.angleToRobot = int(cartesian_to_polar_angle(hx, hy))
-				human_msg_.distanceToRobot = int(dist)
-				compiled_msgs_.humans.append(human_msg_)
-
-
+def Force_update(data):
+    print "force detection"
+    if int(data.data) == robot_number:
+        odom_data = rospy.wait_for_message('/robot' + str(robot_number) + '/odom', Odometry, timeout=None)
+        Odometry_update(odom_data, force_detection=True)
 
 def main():
-  process()
+    rospy.init_node("detection_calculation", anonymous=True)
 
+    global mission_number
+    mission_number = rospy.get_param('~mission_number')
+    global robot_number
+    robot_number = rospy.get_param('~robot_number')
 
-if __name__ == "__main__":
-  main()
+    global init_robot_pose
+    init_robot_pose = yaml.load(open('/home/serl/sarwai-experiment-fd/robot.yaml'))
+
+    global robot_pos_x
+    robot_pos_x = init_robot_pose[mission_number][str(robot_number)]['x']
+
+    global robot_pos_y
+    robot_pos_y = init_robot_pose[mission_number][str(robot_number)]['y']
+
+    global robot_pos_th
+    robot_pos_th = init_robot_pose[mission_number][str(robot_number)]['theta']
+
+    global depth_of_field
+    depth_of_field = init_robot_pose[mission_number][str(robot_number)]['dof']
+
+    global robot_fov
+    robot_fov = init_robot_pose[mission_number][str(robot_number)]['fov']
+
+    global humans_dict
+    humans_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/human.yaml'))
+
+    global walls_dict
+    walls_dict = yaml.load(open('/home/serl/sarwai-experiment-fd/walls.yaml'))
+
+    global human_detector
+    human_detector = human_finder.HumanFinder(walls_dict, humans_dict, depth_of_field, robot_fov, FOV_MARGIN, robot_number)
+
+    #print('WAITING FOR GAZEBO')
+    # time.sleep(35)
+    print("START CALCULATION")
+
+    global pub
+    pub = rospy.Publisher('sarwai_detection/custom_msgs_info', CompiledFakeMessage, queue_size=1000)
+
+    rospy.Subscriber('robot' + str(robot_number) + '/odom', Odometry, Odometry_update, queue_size=1)
+
+    rospy.Subscriber('coffee', String, Force_update, queue_size=1)
+
+    rospy.spin()

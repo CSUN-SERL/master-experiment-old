@@ -5,13 +5,14 @@ import yaml
 import sys
 
 from rospy import ROSException
-from nav_msgs.msg import Odometry
+#from nav_msgs.msg import Odometry
 import multiprocessing
-from ctypes import c_bool
+# from ctypes import c_bool
 #from multiprocessing import Process
 #from audio_trigger_node.msg import Trigger
 from detection_msgs.msg import AudioDetection
-import shout
+from detection_msgs.msg import PseudoOdometry
+# import shout
 
 # Topic used to send logging message
 pubtopic = '/sarwai_detection/detection_audio'
@@ -21,14 +22,14 @@ pub = rospy.Publisher(pubtopic, AudioDetection, queue_size = 1000)
 activatedLocations = {}
 
 #Set up icecast shout service
-s = shout.Shout()
-s.host = 'localhost'
+# s = shout.Shout()
+# s.host = 'localhost'
 # s.port = 8050
 # s.password = 'SERLstream'
-s.port = 8050
-s.password = 'hackme'
-s.mount = 'testmount'
-s.format = 'mp3'
+# s.port = 8050
+# s.password = 'hackme'
+# s.mount = 'testmount'
+# s.format = 'mp3'
 #s.protocol = 'http'
 # s.audio_info = {
 #   shout.SHOUT_AI_BITRATE : ,
@@ -37,32 +38,32 @@ s.format = 'mp3'
 #   shout.SHOUT_AI_QUALITY : 
 # }
 
-s.open()
+# s.open()
 
 # Define function to loop background file to icecast
 
 ## Should bg loop be moved to audio_streamer?
 
-bg_playing = multiprocessing.Value(c_bool, True)
+# bg_playing = multiprocessing.Value(c_bool, True)
 
-def bgLoop():
-    bgfilename = 'audio/audioloop.mp3'
-    bg = open(bgfilename, 'rb')
+# def bgLoop():
+#     bgfilename = 'audio/audioloop.mp3'
+#     bg = open(bgfilename, 'rb')
 
-    nbuf = bg.read(4096)
-    while True:
-        if bg_playing.value:
-            buf = nbuf
-            nbuf = bg.read(4096)
-            if len(buf) == 0:
-                print("looping bg")
-                bg.close()
-                bg = open(bgfilename)
-                continue
-            s.send(buf)
-            s.sync()
-        else:
-            continue
+#     nbuf = bg.read(4096)
+#     while True:
+#         if bg_playing.value:
+#             buf = nbuf
+#             nbuf = bg.read(4096)
+#             if len(buf) == 0:
+#                 print("looping bg")
+#                 bg.close()
+#                 bg = open(bgfilename)
+#                 continue
+#             s.send(buf)
+#             s.sync()
+#         else:
+#             continue
 
 def main():
     #rospy.init_node('listen_for_pose',anonymous = True)
@@ -102,56 +103,44 @@ def main():
         #query_list[key] = QueryData(**query_info_yaml['queries'][key])
         query_list[key] = value
 
-    # Begin background audio stream
-    pbg = multiprocessing.Process(target = bgLoop)
-    pbg.start()
-
-
-    #IGNORING POSE FAKER FOR NOW
-    #subscribe to pose_mock
-    #publish pose_mock
-#    p11 = Process(target = pose_mock(1))
-#    p12 = Process(target = pose_mock(2))
-#    p11.start()
-#    p12.start()
-
     # Begin monitoring robot location
-    p21 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot1/odometry/filtered',1))
-    p22 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot2/odometry/filtered',2))
-    p23 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot3/odometry/filtered', 3))
-    p24 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot4/odometry/filtered', 4))
-    p21.start()
-    p22.start()
-    p23.start()
-    p24.start()
-    rospy.spin()
+    # p21 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot1/odometry/filtered', 1))
+    # p22 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot2/odometry/filtered', 2))
+    # p23 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot3/odometry/filtered', 3))
+    # p24 = multiprocessing.Process(target = listen_for_pose, args = ('/test/robot4/odometry/filtered', 4))
+    # p21.start()
+    # p22.start()
+    # p23.start()
+    # p24.start()
+    listen_for_pose()
+    # bgLoop()
 
 
-def stream_audio_query(file_path):
-    try:
-        afile = open(file_path)
-    except:
-        print("false positive")
-        return
+# def stream_audio_query(file_path):
+#     try:
+#         afile = open(file_path)
+#     except:
+#         print("false positive")
+#         return
     
-    bg_playing.value = False
-    nbuf = afile.read(4096)
-    while True:
-        buf = nbuf
-        nbuf = afile.read(4096)
-        if len(buf) == 0:
-            break
-        s.send(buf)
-        s.sync()
+#     bg_playing.value = False
+#     nbuf = afile.read(4096)
+#     while True:
+#         buf = nbuf
+#         nbuf = afile.read(4096)
+#         if len(buf) == 0:
+#             break
+#         s.send(buf)
+#         s.sync()
     
-    afile.close()
-    bg_playing.value = True
+#     afile.close()
+#     bg_playing.value = True
 
-def trigger_callback(msg, args):
+def trigger_callback(msg):
     print "received"
     #pub_trigger = rospy.Publisher('/audio_trigger',Trigger,queue_size=100 )
-
-    pos = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+    robotId = msg.robotId
+    pos = (msg.odom.pose.pose.position.x, msg.odom.pose.pose.position.y)
     currentzone = ''
     #check if odom x and y are in a trigger zone
     for trigger,tval in trigger_list.iteritems():
@@ -179,7 +168,7 @@ def trigger_callback(msg, args):
 
     #publish query to topic for logging in audio logger
     audiomsg = AudioDetection()
-    audiomsg.robotId = args[0]
+    audiomsg.robotId = robotId
     audiomsg.confidence = query['confidence']
     audiomsg.filename = query['file_name']
     audiomsg.transcript = ''
@@ -190,8 +179,8 @@ def trigger_callback(msg, args):
 
     #Cast audio file to icecast
     #TODO: Should this be in a separate process?
-    print 'Streaming from source ' + str(query['file_name'])
-    stream_audio_query('audio/' + str(query['file_name']))
+    # print 'Streaming from source ' + str(query['file_name'])
+    # stream_audio_query('audio/' + str(query['file_name']))
 
 #publishing node for testing
 # def pose_mock(robot_num):
@@ -208,11 +197,12 @@ def trigger_callback(msg, args):
 #         pub_test.publish(msg)
 #         r.sleep()
 
-def listen_for_pose(topic, robotId):
+#def listen_for_pose(topic, robotId):
+def listen_for_pose():
     rospy.init_node('listen_for_pose', anonymous=True)
-    print ("subscribing for " + str(robotId) + " on " + topic)
-    rospy.Subscriber(topic, Odometry, trigger_callback, (robotId,))
-    print ("subscribed, spinning " + str(robotId))
+    print ("subscribing for all robots on /test/robot/odometry/filtered")
+    rospy.Subscriber("/test/robot/odometry/filtered", PseudoOdometry, trigger_callback)
+    print ("subscribed, spinning")
     rospy.spin()
 
 if __name__ == "__main__":

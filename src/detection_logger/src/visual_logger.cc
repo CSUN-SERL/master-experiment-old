@@ -20,7 +20,7 @@ namespace sarwai {
   std::string VisualLogger::Log(cv::Mat image, struct VisualDetectionData data) {
     std::string image_filename = SaveImage(image, data.robot_id);
     LocalSaveDetectionData(data, image_filename);
-    // std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     return image_filename;
   }
 
@@ -46,7 +46,7 @@ namespace sarwai {
     std::string csv_line = GenerateStringCSV(data, saved_image_filename);
     std::string full_text_log_filepath = log_filepath_ + boost::filesystem::path::preferred_separator + "visual-detections.csv";
     
-    std::cout << "Writing: " << csv_line << "To dir: " << full_text_log_filepath << "\n";
+    // std::cout << "Writing: " << csv_line << "To dir: " << full_text_log_filepath << "\n";
 
     std::ofstream outfile(full_text_log_filepath, std::ofstream::app | std::ofstream::out);
     if(!outfile.is_open()) {

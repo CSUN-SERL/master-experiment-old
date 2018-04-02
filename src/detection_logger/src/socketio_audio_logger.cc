@@ -21,7 +21,7 @@ namespace sarwai {
 
   void SocketIOAudioLogger::ReceiveQueryId(sio::event &queryIdEvent) {
     int query_id = queryIdEvent.get_message()->get_int();
-    std::cout << "received query id: " << query_id << "\n";
+    // std::cout << "received query id: " << query_id << "\n";
     std::stringstream iris_script_cmd;
     iris_script_cmd << "python ~/programming/sarwai/adaptation/clustering/evaluate.py " << query_id << " >> audio-iris-log.py";
     system(iris_script_cmd.str().c_str());
@@ -33,19 +33,25 @@ namespace sarwai {
 
   void SocketIOAudioLogger::SendData(struct AudioDetectionData data) {
     std::cout << "#################Sending audio query via socket.io################################" << std::endl;
+    // std::cout << "Audio query" << std::endl;
     std::string json_data = GenerateJSONString(data);
     socket_client_.socket("/socket.io")->emit(audio_detection_event_name_, json_data);
   }
 
   std::string SocketIOAudioLogger::GenerateJSONString(struct AudioDetectionData data) {
     std::stringstream json;
-    json << "{"
-    <<"\""<<"type"<<"\":" << "\"" <<"audio-detection"<<"\""<<","
-    << "\"" << "robotId" << "\":" << "\"" << data.robot_id << "\"" << ","
-    << "\"" << "timestamp" << "\":" << "\"" << data.timestamp << "\"" << ","
-    << "\"" << "confidence" << "\":" << "\"" << data.confidence << "\"" << ","
-    << "\"" << "transcript" << "\":" << "\"" << data.transcript << "\"" << ","
-    << "\"" << "filePath" << "\":" << "\"" << data.audio_filename << "\""
+    json
+    << "{"
+      << "\"detection\": {"
+        << "\"category\": \"" << (stoi(data.audio_filename.substr(5).substr(0, (data.audio_filename.length() == 10 ? 1 : 2))) <= 49 ? "truePositive" : "falsePositive") << "\","
+        << "\"type\": \"audio-detection\","
+        << "\"data\": { "
+          << "\"confidence\": "   << data.confidence        << ","
+          << "\"filePath\": \""   << data.audio_filename    << "\","
+          << "\"robotId\": "      << data.robot_id          << ","
+          << "\"victimId\": -1"
+        << "}"
+      << "}"
     << "}";
 
     return json.str();

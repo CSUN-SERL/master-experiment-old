@@ -11,7 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   sensor_msgs
-  darknet_ros_msgs
+  nav_msgs
+  # darknet_ros_msgs
   message_generation
   genmsg
 )
@@ -25,19 +26,21 @@ find_package(catkin REQUIRED COMPONENTS
    Rect.msg
    DetectionIdImage.msg
    DetectionMatch.msg
-   CompiledMessage.msg
    CompiledFakeMessage.msg
    AudioDetection.msg
    AudioFileReady.msg
    Human.msg
+   HumanSeen.msg
+   PseudoOdometry.msg
  )
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
    std_msgs  # Or other packages containing msgs
+   nav_msgs
    sensor_msgs
-   darknet_ros_msgs
+   # darknet_ros_msgs
  )
 
 catkin_package(
