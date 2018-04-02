@@ -55,10 +55,12 @@ namespace sarwai {
 
     unsigned BOXWIDTH = 70;
     unsigned BOXHEIGHT = 0;
-    float human_height = 1.7;
+    float human_height = 1.70;
 	  unsigned yCoord = (image.height / 2) - (BOXWIDTH / 2);
 
-    BOXHEIGHT = human_height / human.distanceToRobot;
+    BOXHEIGHT = unsigned((human_height / human.distanceToRobot) * 80);
+    if ( BOXHEIGHT < 100 )
+      BOXHEIGHT = 100;
     yCoord += BOXHEIGHT;
 
     //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXWIDTH / 2);
