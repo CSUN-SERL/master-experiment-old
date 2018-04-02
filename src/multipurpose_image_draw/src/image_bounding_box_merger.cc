@@ -53,18 +53,19 @@ namespace sarwai {
   detection_msgs::BoundingBox ImageBoundingBoxMerger::drawBoxAroundHuman(sensor_msgs::Image& image, detection_msgs::Human human, float fov) const {
     detection_msgs::BoundingBox ret;
 
-    unsigned BOXWIDTH = 70;
+    unsigned BOXLENGTH = 70;
     unsigned BOXHEIGHT = 0;
     float human_height = 1.70;
 
 
-    BOXWIDTH = unsigned((human_height / human.distanceToRobot) * 80);
-    if ( BOXWIDTH < 70 )
-      BOXWIDTH = 70;
+    BOXLENGTH = (unsigned)((human_height / human.distanceToRobot) * 80);
+    if ( BOXLENGTH < 70 )
+      BOXLENGTH = 70;
 
-    unsigned yCoord = (image.height / 2) - (BOXWIDTH / 2);
+    BOXHEIGHT = (unsigned)BOXLENGTH * 1.6;
+    unsigned yCoord = (image.height / 2) - (BOXLENGTH / 2);
 
-    //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXWIDTH / 2);
+    //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXLENGTH / 2);
 
 		// Get radians per column of pixels
     float radiansPerPixel = fov / image.width;
@@ -83,7 +84,7 @@ namespace sarwai {
 
 
     //Move the xCoord over by half the box's length (to get the location of the boxes top-left corner)
-    int movedXCoord = xCoord - (BOXWIDTH / 2);
+    int movedXCoord = xCoord - (BOXLENGTH / 2);
 
 
 
@@ -91,7 +92,7 @@ namespace sarwai {
     cvImage = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
     cv::Mat imageMatrix = cvImage->image;
     cv::Point topLeftCorner = cv::Point(movedXCoord, yCoord);
-    cv::Point bottomRightCorner = cv::Point(movedXCoord + BOXWIDTH, yCoord + BOXWIDTH);
+    cv::Point bottomRightCorner = cv::Point(movedXCoord + BOXLENGTH, yCoord + BOXHEIGHT);
     cv::rectangle(imageMatrix, topLeftCorner, bottomRightCorner, 50);
     image = *(cv_bridge::CvImage(image.header, "bgr8", imageMatrix).toImageMsg());
 
