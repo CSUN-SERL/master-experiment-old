@@ -62,7 +62,7 @@ namespace sarwai {
     if ( BOXLENGTH < 70 )
       BOXLENGTH = 70;
 
-    BOXHEIGHT = static_cast<unsigned>BOXLENGTH * 1.6;
+    BOXHEIGHT = static_cast<unsigned>(BOXLENGTH * 1.6);
     unsigned yCoord = (image.height / 2) + (BOXLENGTH / 2);
 
     //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXLENGTH / 2);
