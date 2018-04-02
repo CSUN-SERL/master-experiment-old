@@ -20,7 +20,7 @@ namespace sarwai {
     ~ImageBoundingBoxMerger();
 
   private:
-    const unsigned BOXLENGTH = 70;
+    //const unsigned BOXLENGTH = 70;
 
     ros::NodeHandle* m_nh;
 
