@@ -17,7 +17,7 @@ from std_msgs.msg import String
 import helpers
 
 robot_number=4
-toggle = False
+toggle = True
 start_or_stop = 'start'
 
 #initial position of the robot

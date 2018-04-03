@@ -17,7 +17,7 @@ import helpers
 
 # added these
 robot_number=1
-toggle = False
+toggle = True
 start_or_stop = 'start'
 
 #initial position of the robot
