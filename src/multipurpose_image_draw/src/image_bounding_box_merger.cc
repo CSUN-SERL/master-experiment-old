@@ -15,12 +15,12 @@ namespace sarwai {
     m_boxStreamPubThree = m_nh->advertise<sensor_msgs::Image>("robot3/camera/rgb/image_boxed", 1000);
     m_boxStreamPubFour = m_nh->advertise<sensor_msgs::Image>("robot4/camera/rgb/image_boxed", 1000);
   }
-  
+
 
   ImageBoundingBoxMerger::~ImageBoundingBoxMerger() {
     //empty
   }
-  
+
   void ImageBoundingBoxMerger::drawBoxesCallback(const detection_msgs::CompiledFakeMessageConstPtr& msg) {
     // Draw boxes for each new query
     for(unsigned i = 0; i < msg->humanQueries.size(); ++i) {
@@ -53,10 +53,21 @@ namespace sarwai {
 
   detection_msgs::BoundingBox ImageBoundingBoxMerger::drawBoxAroundHuman(sensor_msgs::Image& image, detection_msgs::Human human, float fov) const {
     detection_msgs::BoundingBox ret;
-	
-	  unsigned yCoord = (image.height / 2) - (BOXLENGTH / 2);
+
+    unsigned BOXLENGTH = 70;
+    unsigned BOXHEIGHT = 0;
+    float human_height = 1.7;
+
+    int box_size_multiplier = 200;
+    BOXLENGTH =  static_cast<unsigned>((human_height / human.distanceToRobot) * box_size_multiplier);
+    if ( BOXLENGTH < 70 )
+      BOXLENGTH = 70;
+
+    BOXHEIGHT = static_cast<unsigned>(BOXLENGTH * 1);
+    unsigned yCoord = (image.height / 2) + (BOXLENGTH / 2);
+
     //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXLENGTH / 2);
-    
+
 		// Get radians per column of pixels
     float radiansPerPixel = fov / image.width;
 
@@ -76,11 +87,13 @@ namespace sarwai {
     //Move the xCoord over by half the box's length (to get the location of the boxes top-left corner)
     int movedXCoord = xCoord - (BOXLENGTH / 2);
 
+
+
     cv_bridge::CvImagePtr cvImage;
     cvImage = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
     cv::Mat imageMatrix = cvImage->image;
     cv::Point topLeftCorner = cv::Point(movedXCoord, yCoord);
-    cv::Point bottomRightCorner = cv::Point(movedXCoord + BOXLENGTH, yCoord + BOXLENGTH);
+    cv::Point bottomRightCorner = cv::Point(movedXCoord + BOXLENGTH, yCoord - BOXHEIGHT);
     cv::rectangle(imageMatrix, topLeftCorner, bottomRightCorner, 50);
     image = *(cv_bridge::CvImage(image.header, "bgr8", imageMatrix).toImageMsg());
 
@@ -97,7 +110,7 @@ namespace sarwai {
     for(unsigned i = 0; i < msg->humans.size(); ++i) {
       drawBoxAroundHuman(imageCopy, msg->humans[i], msg->fov);
     }
-    
+
     if(id == 1) {
       m_boxStreamPubOne.publish(imageCopy);
     }
