@@ -50,6 +50,7 @@ def Odometry_update(data, force_detection=False):
         human.dclass = human_data['dclass']
         human.angleToRobot = human_data['human_angle']
         human.distanceToRobot = human_data['distance_to_robot']
+        human.confidence = human_data['confidence']
         human.forced = force_detection
 
         humans_list.append(human)

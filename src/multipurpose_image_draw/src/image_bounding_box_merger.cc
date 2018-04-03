@@ -46,6 +46,7 @@ namespace sarwai {
     queryMsg.bounding_box = box;
     queryMsg.human_id = human.id;
     queryMsg.forced = human.forced;
+    queryMsg.confidence = human.confidence;
 
     this->m_visualDetectionPub.publish(queryMsg);
   }
