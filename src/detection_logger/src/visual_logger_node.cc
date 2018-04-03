@@ -50,6 +50,7 @@ void LogVisualDetection(const detection_msgs::ProcessedVisualDetection::ConstPtr
   data.object_class = "Human";
   data.robot_id = msg->robotId;
   data.human_id = msg->human_id;
+  data.confidence_rating = msg->confidence;
 
   // Convert ROS image to OpenCV image
   cv::Mat cvimage = cv_bridge::toCvCopy(msg->image, sensor_msgs::image_encodings::BGR8)->image;
