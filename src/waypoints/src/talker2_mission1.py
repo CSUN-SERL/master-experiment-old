@@ -21,8 +21,8 @@ toggle = True
 start_or_stop = 'start'
 
 #initial position of the robot
-robotx = -0.0433372408152
-roboty = -1.28397524357
+robotx = 0
+roboty = 0
 sac = actionlib.SimpleActionClient('robot2/move_base', MoveBaseAction)
 
 
@@ -47,7 +47,9 @@ def talker(x , y , z , w):
     global sac 
 
     t = int(time.time())
-    if not toggle: rospy.loginfo('Sending point')
+    while(toggle):
+        time.sleep(1)
+    #if not toggle: rospy.loginfo('Sending point')
     sac.wait_for_server()
     goal = MoveBaseGoal()    #use self?
     #set goal
@@ -63,7 +65,7 @@ def talker(x , y , z , w):
     
     if (toggle):
         rospy.loginfo("Robot 1 is set to manual control")
-        time.sleep(2)
+        #time.sleep(2)
         talker(x ,y, z, w)
 
     #send goal
@@ -72,7 +74,7 @@ def talker(x , y , z , w):
         sac.cancel_goal()
         talker(x, y, z, w)
     #finish
-    sac.wait_for_result(rospy.Duration(20))
+    sac.wait_for_result(rospy.Duration(10))
     if (toggle):
         sac.cancel_goal()
         talker(x, y, z, w)
@@ -112,10 +114,10 @@ def toggle_callback(data):
 
     start_or_stop, query_robot_id = helpers.stop_or_start_parse(data.data)
  
-   # if (isinstance(data.data, basestring)):
-   #   data_split = data.data.split('-')
-   #   start_or_stop = data_split[1]
-   #   query_robot_id = int(data_split[0])
+    #if (isinstance(data.data, basestring)):
+    #  data_split = data.data.split('-')
+    #  start_or_stop = data_split[1]
+    #  query_robot_id = int(data_split[0])
     
     if (robot_number == int(query_robot_id)):
         
@@ -136,8 +138,8 @@ def callback(data):
     global robotx
     global roboty
     #location of the robot
-    robotx = data.polygon.points[3].x+robotx
-    roboty = data.polygon.points[3].y+roboty
+    robotx = data.polygon.points[3].x
+    roboty = data.polygon.points[3].y
     #rospy.loginfo(robotx)
 
 if __name__ == '__main__':

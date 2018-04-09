@@ -13,7 +13,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from actionlib import SimpleActionClient, GoalStatus
 from geometry_msgs.msg import *
 from std_msgs.msg import String
-import helper
+import helpers
 
 # added these
 robot_number=2
@@ -53,7 +53,9 @@ def talker(x , y , z , w):
     global sac 
 
     t = int(time.time())
-    if not toggle: rospy.loginfo('Sending point')
+    while(toggle):
+        time.sleep(1)
+    #if not toggle: rospy.loginfo('Sending point')
     sac.wait_for_server()
     goal = MoveBaseGoal()    #use self?
     #set goal
@@ -69,7 +71,7 @@ def talker(x , y , z , w):
     
     if (toggle):
         rospy.loginfo("Robot 2 is set to manual control")
-        time.sleep(10)
+        #time.sleep(10)
         talker(x ,y, z, w)
 
     #send goal
@@ -78,7 +80,7 @@ def talker(x , y , z , w):
         sac.cancel_goal()
         talker(x, y, z, w)
     #finish
-    sac.wait_for_result(rospy.Duration(20))
+    sac.wait_for_result(rospy.Duration(10))
     if (toggle):
         sac.cancel_goal()
         talker(x, y, z, w)

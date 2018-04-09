@@ -21,11 +21,7 @@
 		<arg name="robot_number" value="2" />
 	</include>
 
-	<include file="$(find detection_calculation)/launch/fake_detection.launch">
-		<arg name="name" value="robot_detection_3" />
-		<arg name="mission_number" value="$(arg mission_string)" />
-		<arg name="robot_number" value="3" />
-	</include>
+
 
 	<include file="$(find detection_calculation)/launch/fake_detection.launch">
 		<arg name="name" value="robot_detection_4" />
@@ -33,8 +29,14 @@
 		<arg name="robot_number" value="4" />
 	</include>
 
+	<include file="$(find detection_calculation)/launch/fake_detection.launch">
+		<arg name="name" value="robot_detection_3" />
+		<arg name="mission_number" value="$(arg mission_string)" />
+		<arg name="robot_number" value="3" />
+	</include>
+
 	<node pkg="pseudo_tracker" type="pseudo_tracker_node" name="pseudo_tracker_node" output="screen"/>
-	
+
 	<node pkg="multipurpose_image_draw" type="multipurpose_image_draw_node" name="multipurpose_image_draw_node" output="screen"/>
 
 	<node pkg="detection_logger" type="visual_logger_node" name="visual_logger_node" output="screen"/>

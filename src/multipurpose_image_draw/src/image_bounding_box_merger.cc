@@ -54,16 +54,27 @@ namespace sarwai {
   detection_msgs::BoundingBox ImageBoundingBoxMerger::drawBoxAroundHuman(sensor_msgs::Image& image, detection_msgs::Human human, float fov) const {
     detection_msgs::BoundingBox ret;
 
+    // if human lying = true
+    //    swap boxheight and length
     unsigned BOXLENGTH = 70;
     unsigned BOXHEIGHT = 0;
-    float human_height = 1.7;
+    float human_height = 1.6;
 
-    int box_size_multiplier = 200;
+
+    int box_size_multiplier = 300;
     BOXLENGTH =  static_cast<unsigned>((human_height / human.distanceToRobot) * box_size_multiplier);
     if ( BOXLENGTH < 70 )
       BOXLENGTH = 70;
 
-    BOXHEIGHT = static_cast<unsigned>(BOXLENGTH * 1);
+    BOXHEIGHT = static_cast<unsigned>(BOXLENGTH * 1.8);
+
+    unsigned swap = 0;
+    if (human.lying == true){
+        swap = BOXHEIGHT;
+        BOXHEIGHT = BOXLENGTH;
+        BOXLENGTH = swap;
+      }
+
     unsigned yCoord = (image.height / 2) + (BOXLENGTH / 2);
 
     //unsigned xCoord = ((-1 * (human.angleToRobot / (fov / image.width))) + (image.width / 2)) - (BOXLENGTH / 2);

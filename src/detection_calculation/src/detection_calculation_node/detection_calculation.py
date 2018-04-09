@@ -68,8 +68,8 @@ def Odometry_update(data, force_detection=False):
     pub.publish(new_message)
 
 def Force_update(data):
-    print "force detection"
     if int(data.data) == robot_number:
+        print "force detection " + str(robot_number)
         odom_data = rospy.wait_for_message('/robot' + str(robot_number) + '/odom', Odometry, timeout=None)
         Odometry_update(odom_data, force_detection=True)
 
@@ -100,7 +100,8 @@ def main():
     robot_fov = init_robot_pose[mission_number][str(robot_number)]['fov']
 
     global humans_dict
-    humans_dict = yaml.load(open('human.yaml'))
+    humans_dict = yaml.load(open('human_lying.yaml'))
+    #humans_dict = yaml.load(open('human.yaml'))
 
     global walls_dict
     walls_dict = yaml.load(open('walls.yaml'))
