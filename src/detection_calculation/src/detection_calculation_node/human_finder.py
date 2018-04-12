@@ -104,6 +104,7 @@ class HumanFinder:
                 if self.wall_intersects_view_to_human(human_data['x'], human_data['y'], tl, br, robot_x, robot_y):
                     break
             else:
+                #if int(human_id) <= 290:
                 humans_seen_by_camera[human_id] = human_data
 
         return humans_seen_by_camera
