@@ -40,10 +40,26 @@ namespace sarwai {
 
   std::string SocketIOAudioLogger::GenerateJSONString(struct AudioDetectionData data) {
     std::stringstream json;
+
+    // "audio53.ogg"
+    std::string num = data.audio_filename;
+
+    //"53.ogg"
+    num = num.substr(5);
+
+    //length of number
+    int numLen = num.length() == 5 ? 1 : 2;
+
+    //"53"
+    num = num.substr(0, numLen);
+    
+    //53
+    int finalNum = stoi(num);
+
     json
     << "{"
       << "\"detection\": {"
-        << "\"category\": \"" << (stoi(data.audio_filename.substr(5).substr(0, (data.audio_filename.length() == 10 ? 1 : 2))) <= 49 ? "truePositive" : "falsePositive") << "\","
+        << "\"category\": \"" << (finalNum <= 49 ? "truePositive" : "falsePositive") << "\","
         << "\"type\": \"audio-detection\","
         << "\"data\": { "
           << "\"confidence\": "   << data.confidence        << ","

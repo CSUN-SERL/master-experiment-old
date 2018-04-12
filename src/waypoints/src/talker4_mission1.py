@@ -53,7 +53,10 @@ def talker(x , y , z , w):
 
     t = int(time.time())
 
-    if not toggle: rospy.loginfo('Sending point')
+    while(toggle):
+        time.sleep(1)
+    
+    #if not toggle: rospy.loginfo('Sending point')
     sac.wait_for_server()
     goal = MoveBaseGoal()    #use self?
     #set goal
@@ -69,7 +72,7 @@ def talker(x , y , z , w):
 
     if (toggle):
         rospy.loginfo("Robot 4 is set to manual control")
-        time.sleep(10)
+        #time.sleep(10)
         talker(x ,y, z, w)
 
     #send goal
@@ -78,7 +81,7 @@ def talker(x , y , z , w):
         sac.cancel_goal()
         talker(x, y, z, w)
     #finish
-    sac.wait_for_result(rospy.Duration(20))
+    sac.wait_for_result(rospy.Duration(10))
     if (toggle):
         sac.cancel_goal()
         talker(x, y, z, w)
@@ -117,10 +120,10 @@ def toggle_callback(data):
 
     start_or_stop, query_robot_id = helpers.stop_or_start_parse(data.data)
  
-   # if (isinstance(data.data, basestring)):
-   #   data_split = data.data.split('-')
-   #   start_or_stop = data_split[1]
-   #   query_robot_id = int(data_split[0])
+    #if (isinstance(data.data, basestring)):
+    #  data_split = data.data.split('-')
+    #  start_or_stop = data_split[1]
+    #  query_robot_id = int(data_split[0])
     
     if (robot_number == int(query_robot_id)):
         

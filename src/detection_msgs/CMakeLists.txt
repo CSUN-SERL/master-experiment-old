@@ -30,6 +30,7 @@ find_package(catkin REQUIRED COMPONENTS
    AudioDetection.msg
    AudioFileReady.msg
    Human.msg
+   HumanLying.msg
    HumanSeen.msg
    PseudoOdometry.msg
  )

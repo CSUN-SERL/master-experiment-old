@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-Author name: Emre Can Bulut 
+<!--
+Author name: Emre Can Bulut
 -->
 
 
@@ -11,7 +11,7 @@ Author name: Emre Can Bulut
   <param name="/use_sim_time" value="true" />
   <arg name="world_file"  default="$(env TURTLEBOT_GAZEBO_WORLD_FILE)"/>
   <arg name="location_of_init_bash" value="/home/serl/Documents/multi_bots_v3/src/multirobot/multirobot/init-env.bash" />
-  
+
 
 
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -22,35 +22,28 @@ Author name: Emre Can Bulut
         <arg name="world_name" value="$(find multirobot)/worlds/jacaranda_v4_v2_humans.world"/>
 				<arg name="verbose" value="true" />
     </include>
-    
-  <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
-  
+
+
+
   <!-- include our robots -->
   <include file="$(find multirobot)/launch/missions/multirobot_$(arg mission_string).launch">
         <arg name="location_of_init_bash" value="$(arg location_of_init_bash)" />
         <!-- <arg name="station_name" value="$(arg station_name)" /> -->
   </include>
 
-  <!-- <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" /> -->
-  
   <!-- start rviz -->
   <!-- <include file="$(find multirobot)/launch/view_navigation.launch"> -->
         <!-- <arg name="station_name" value="$(arg station_name)" /> -->
   <!-- </include> -->
-  
-  <node name="toggle_check" pkg="waypoints" type="toggle_check.py"/>
 
-  
+  <!-- <node name="toggle_check" pkg="waypoints" type="toggle_check.py"/>
+
   <node name="talker1" pkg="waypoints" type="talker1_$(arg mission_string).py"/>
   <node name="talker2" pkg="waypoints" type="talker2_$(arg mission_string).py"/>
-  
+
   <node name="talker3" pkg="waypoints" type="talker3_$(arg mission_string).py"/>
-  <node name="talker4" pkg="waypoints" type="talker4_$(arg mission_string).py"/>
-  
-  <!--
-  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
-  </include>
-  -->
-  <!--<node name="video_feed" pkg="web_video_server" type="web_video_server"/>-->
-  <!--<include file="/home/serl/Documents/detection/multirobot.launch"> </include>-->
+  <node name="talker4" pkg="waypoints" type="talker4_$(arg mission_string).py"/> -->
+
+  <node name="video_feed" pkg="web_video_server" type="web_video_server"/>
+  <include file="/home/serl/Documents/detection/multirobot.launch"> </include>
 </launch>

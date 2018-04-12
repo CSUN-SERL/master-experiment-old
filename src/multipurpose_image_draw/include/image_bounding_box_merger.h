@@ -9,7 +9,7 @@
 #include "detection_msgs/ProcessedVisualDetection.h"
 #include "detection_msgs/BoundingBox.h"
 #include "detection_msgs/Human.h"
-
+//#include "detection_msgs/HumanLying.h"
 
 namespace sarwai {
 
