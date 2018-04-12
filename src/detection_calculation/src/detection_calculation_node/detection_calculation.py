@@ -9,6 +9,9 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from detection_msgs.msg import CompiledFakeMessage
 from detection_msgs.msg import Human
+from gazebo_msgs.srv import GetModelState as GazeboGetModelState
+
+import gazebo_ros
 
 import human_finder
 from util import *
@@ -16,31 +19,57 @@ from util import *
 global FOV_MARGIN
 FOV_MARGIN = 0.087 / 2.0
 
+def update_robot_model_state():
+    rospy.wait_for_service('/gazebo/get_model_state')
+    try:
+        get_model_state_call = rospy.ServiceProxy('/gazebo/get_model_state', GazeboGetModelState)
+        model_state = get_model_state_call('robot{}'.format(robot_number), 'world')
+        global robot_pos_x
+        robot_pos_x = model_state.pose.position.x
+        global robot_pos_y
+        robot_pos_y = model_state.pose.position.y
+
+        xQ = model_state.pose.orientation.x
+        yQ = model_state.pose.orientation.y
+        zQ = model_state.pose.orientation.z
+        wQ = model_state.pose.orientation.w
+
+        # Converting quaternion to euler angle
+        xE, yE, zE = quaternion_to_euler_angle(xQ, yQ, zQ, wQ)
+
+        global robot_pos_th
+        robot_pos_th = zE
+    except Exception as e:
+        print e
+
 
 def Odometry_update(data, force_detection=False):
-    # Getting x and z change for robot
-    x = data.pose.pose.position.x * -1
-    y = data.pose.pose.position.y * -1
+    # # Getting x and z change for robot
+    # x = data.pose.pose.position.x * -1
+    # y = data.pose.pose.position.y * -1
+    #
+    # # Getting the Quaternion info
+    # xQ = data.pose.pose.orientation.x
+    # yQ = data.pose.pose.orientation.y
+    # zQ = data.pose.pose.orientation.z
+    # wQ = data.pose.pose.orientation.w
+    #
+    # # Converting quaternion to euler angle
+    # xE, yE, zE = quaternion_to_euler_angle(xQ, yQ, zQ, wQ)
+    #
+    # # Robot position constantly updated
+    # new_x_pos = robot_pos_x + x
+    # new_y_pos = robot_pos_y + y
+    # new_th_pos = robot_pos_th + zE
 
-    # Getting the Quaternion info
-    xQ = data.pose.pose.orientation.x
-    yQ = data.pose.pose.orientation.y
-    zQ = data.pose.pose.orientation.z
-    wQ = data.pose.pose.orientation.w
-
-    # Converting quaternion to euler angle
-    xE, yE, zE = quaternion_to_euler_angle(xQ, yQ, zQ, wQ)
-
-    # Robot position constantly updated
-    new_x_pos = robot_pos_x + x
-    new_y_pos = robot_pos_y + y
-    new_th_pos = robot_pos_th + zE
+    update_robot_model_state()
 
     # Searching for humans
-    # O(n) search
     # humans within fov
-
-    humans_in_view_dict = human_detector.find_people_in_view(new_x_pos, new_y_pos, new_th_pos, force_detection)
+    global robot_pos_x
+    global robot_pos_y
+    global robot_pos_th
+    humans_in_view_dict = human_detector.find_people_in_view(robot_pos_x, robot_pos_y, robot_pos_th, force_detection)
 
     humans_list = []
 
