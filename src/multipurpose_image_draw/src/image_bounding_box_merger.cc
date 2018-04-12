@@ -8,8 +8,8 @@ namespace sarwai {
     m_nh = new ros::NodeHandle();
     std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@MP IMAGE DRAW" << std::endl;
 
-    m_trackingSub = m_nh->subscribe(subscriptionTopic, 1000, &ImageBoundingBoxMerger::drawBoxesCallback, this);
-    m_visualDetectionPub = m_nh->advertise<detection_msgs::ProcessedVisualDetection>("/sarwai_detection/detection_processeddetection", 1000);
+    m_trackingSub = m_nh->subscribe(subscriptionTopic, 1, &ImageBoundingBoxMerger::drawBoxesCallback, this);
+    m_visualDetectionPub = m_nh->advertise<detection_msgs::ProcessedVisualDetection>("/sarwai_detection/detection_processeddetection", 1);
     m_boxStreamPubOne = m_nh->advertise<sensor_msgs::Image>("/robot1/camera/rgb/image_boxed", 1000);
     m_boxStreamPubTwo = m_nh->advertise<sensor_msgs::Image>("/robot2/camera/rgb/image_boxed", 1000);
     m_boxStreamPubThree = m_nh->advertise<sensor_msgs::Image>("robot3/camera/rgb/image_boxed", 1000);
