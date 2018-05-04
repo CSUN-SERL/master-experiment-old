@@ -92,8 +92,9 @@ def Odometry_update(data, force_detection=False):
     # float
     new_message.fov = robot_fov
 
-    new_message.img = rospy.wait_for_message('/robot' + str(robot_number) + '/camera/rgb/image_raw', Image,
-                                             timeout=None)
+    # new_message.img = rospy.wait_for_message('/robot' + str(robot_number) + '/camera/rgb/image_raw', Image,
+    #                                          timeout=None)
+    new_message.img = data
     pub.publish(new_message)
 
 def Force_update(data):
@@ -145,7 +146,7 @@ def main():
     global pub
     pub = rospy.Publisher('sarwai_detection/custom_msgs_info', CompiledFakeMessage, queue_size=1000)
 
-    rospy.Subscriber('robot' + str(robot_number) + '/odom', Odometry, Odometry_update, queue_size=1)
+    rospy.Subscriber('robot' + str(robot_number) + '/camera/rgb/image_raw', Image, Odometry_update, queue_size=1)
 
     rospy.Subscriber('coffee', String, Force_update, queue_size=1)
 
